@@ -1,0 +1,148 @@
+package main;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author ramir
+ */
+public class ObjectManager {
+    
+    public ArrayList<Objects> existingObjects;
+    public Objects selectedObject;
+    public MouseManager mouseManager;
+    public Rectangle[] resizeSquares;
+    public int xOffset, yOffset;
+    public Display display;
+    
+    public ObjectManager(MouseManager mouseManager){
+        existingObjects = new ArrayList<Objects>();
+        resizeSquares = new Rectangle[4];
+        this.mouseManager = mouseManager;
+        xOffset = 0;
+        yOffset = 0;
+    }
+    
+    public void render(Graphics g){
+        
+        for(int i = 0; i < 4; i++) {
+        	if(resizeSquares[i] != null) {
+        		g.setColor(Color.black);
+        		g.drawRect(resizeSquares[i].x, resizeSquares[i].y, resizeSquares[i].width, resizeSquares[i].height);
+        		g.setColor(Color.white);
+        		g.fillRect(resizeSquares[i].x, resizeSquares[i].y, resizeSquares[i].width, resizeSquares[i].height);
+        	}
+        }
+        for(Objects object: existingObjects){
+            object.render(g);
+        }
+        
+    }
+    
+
+    public void tick(){
+    	
+    	if(mouseManager.isLeftPressed()) {
+    		updateAttributes(); 
+    		selectObject();
+    		
+    		loadAttributes(); 
+    		
+        }
+
+    	if(selectedObject == null) {
+    		resizeSquares = new Rectangle[4];
+    		xOffset = 0;
+    		yOffset = 0;
+    	}
+    	else {
+    		resizeSquares[0] = new Rectangle((int) selectedObject.x - 5, (int) selectedObject.y - 5, 5, 5 );
+    		resizeSquares[1] = new Rectangle((int) selectedObject.x - 5, (int) selectedObject.y + selectedObject.height, 5, 5 );
+    		resizeSquares[2] = new Rectangle((int) selectedObject.x + selectedObject.width, (int) selectedObject.y - 5, 5, 5 );
+    		resizeSquares[3] = new Rectangle((int) selectedObject.x + selectedObject.width, (int) selectedObject.y + selectedObject.height, 5, 5 );
+    		
+    		
+    		
+    		if(selectedObject != null && mouseManager.isLeftPressed()) {
+    			
+    				
+    			changeLocation();
+    		}
+    	}
+        for(Objects object: existingObjects){
+            object.tick();
+        }
+          
+    }
+    
+    public void addObject(Objects object){
+        existingObjects.add(object);
+        selectedObject = object;
+    }
+    
+    public void removeObject(Objects object){
+        existingObjects.remove(object);
+    }
+    
+    public void changeLocation(){
+        selectedObject.x = mouseManager.getMouseX() - xOffset;
+        selectedObject.y = mouseManager.getMouseY() - yOffset;
+    }
+    
+    public void selectObject() {
+    	for(Objects object: existingObjects) {
+    		if(object.bounds.contains(new Point(mouseManager.getMouseX(), mouseManager.getMouseY()))) {
+    			if(xOffset == 0 && yOffset == 0) {
+    				xOffset = (int) (mouseManager.getMouseX() - object.x);
+    				yOffset = (int) (mouseManager.getMouseY() - object.y);
+    			}
+    			
+    			selectedObject = object;
+    			return;
+    		}
+    	}
+    	selectedObject = null;
+    }
+    
+    public Objects getSelectedObject() {
+    	return selectedObject;
+    }
+    
+    public void loadAttributes() {
+    	if(selectedObject != null)
+    		display.setTable((DefaultTableModel) selectedObject.getAttributes());
+    	else
+    		display.setTable(new DefaultTableModel(
+    				new Object[][] { { null, null }, { null, null }, { null, null }, { null, null }, { null, null },
+    						{ null, null }, { null, null }, { null, null }, { null, null }, { null, null }, { null, null },
+    						{ null, null }, { null, null }, { null, null }, { null, null }, { null, null }, { null, null },
+    						{ null, null }, { null, null }, { null, null }, { null, null }, { null, null }, { null, null },
+    						{ null, null }, { null, null }, { null, null }, { null, null }, { null, null }, { null, null },
+    						{ null, null }, { null, null }, { null, null }, { null, null }, { null, null }, { null, null },
+    						{ null, null }, { null, null }, { null, null }, { null, null } },
+    				new String[] { "Attribute", "Textbox" }) {
+    			boolean[] canEdit = new boolean[] { false, true };
+
+    			public boolean isCellEditable(int rowIndex, int columnIndex) {
+    				return canEdit[columnIndex];
+    			}
+    		});
+    }
+    
+    public void updateAttributes() {
+    	if(selectedObject != null) {
+    		selectedObject.updateAttributes(display.getTable());
+    	}
+    }
+
+	public void addDisplay(Display display) {
+		this.display = display;
+		
+	}
+}

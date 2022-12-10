@@ -11,7 +11,7 @@ public class Stronghold extends Perk{
 	public Stronghold(Handler handler) {
 		super(handler);
 		this.name = "Stronghold";
-		this.icon = Assets.ammoBox;
+		this.icon = Assets.stronghold;
 	}
 
 	Timer activationTimer = new Timer(300);

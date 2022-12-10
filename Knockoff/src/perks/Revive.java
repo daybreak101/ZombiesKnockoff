@@ -8,7 +8,7 @@ public class Revive extends Perk{
 	public Revive(Handler handler) {
 		super(handler);
 		this.name = "Revive";
-		this.icon = Assets.dirt;
+		this.icon = Assets.revive;
 	}
 
 	@Override

@@ -118,6 +118,9 @@ public class EntityManager {
 		for(Blood e: blood) {
 			e.render(g);
 		}
+		for(PowerUps e: powerups) {
+			e.render(g);
+		}
 
 		for(Entity e : entities) {
 			e.render(g);
@@ -154,7 +157,6 @@ public class EntityManager {
 	}
 	
 	public void addPowerUp(PowerUps e) {
-		entities.add(e);
 		powerups.add(e);
 	}
 	

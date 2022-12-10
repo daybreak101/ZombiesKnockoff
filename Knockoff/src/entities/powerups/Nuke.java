@@ -11,6 +11,9 @@ public class Nuke extends PowerUps{
 
 	public Nuke(Handler handler, float x, float y) {
 		super(handler, x, y);
+		name = "Nuke";
+		icon = null;
+		floatingAsset = null;
 	}
 
 	public void tick() {

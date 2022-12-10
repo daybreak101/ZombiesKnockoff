@@ -383,7 +383,12 @@ public class Player extends Creature {
 		} else {
 			g2d.rotate(Math.toRadians(angle), x - handler.getGameCamera().getxOffset() + width / 2,
 					y - handler.getGameCamera().getyOffset() + height / 2);
-			if (justTookDamage == true) {
+			if(isFrozen) {
+				g2d.drawImage(Assets.player[4], (int) (x - handler.getGameCamera().getxOffset()),
+						(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
+
+			}
+			else if (justTookDamage == true) {
 				g2d.drawImage(Assets.player[1], (int) (x - handler.getGameCamera().getxOffset()),
 						(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 

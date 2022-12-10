@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;Knockoff/res/Recording (12).wav&apos; to &apos;y[um.wav&apos;" description="Rename resource &apos;Recording (12).wav&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="res/Recording (12).wav" name="y[um.wav" stamp="1643589503135" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;Knockoff/res/y[um.wav&apos; to &apos;yum.wav&apos;" description="Rename resource &apos;y[um.wav&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="res/y[um.wav" name="yum.wav" stamp="1643589511559" updateReferences="true"/>
+</session>

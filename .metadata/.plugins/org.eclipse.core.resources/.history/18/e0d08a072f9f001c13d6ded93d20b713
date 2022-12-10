@@ -1,0 +1,64 @@
+package main;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Polygon;
+import java.awt.image.BufferedImage;
+
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
+/**
+ *
+ * @author ramir
+ */
+public class NewRect extends Objects{
+   
+
+    public NewRect(float x, float y, String name, BufferedImage image) {
+        super(x, y, name, image);        
+        bounds = new Polygon();
+        width = 100;
+        height = 30;
+        bounds.addPoint((int) x, (int) y);
+        bounds.addPoint((int) x + width, (int) y);
+        bounds.addPoint((int) x + width, (int) y + height);
+        bounds.addPoint((int) x, (int) y + height);
+        
+        
+    }
+    
+    public DefaultTableModel getAttributes() {
+    	return new DefaultTableModel(
+				new Object[][] { { "x", x }, { "y", y }, { "width", width }, { "height", height } 
+				 },
+			new String[] { "Attribute", "Textbox" }) {
+		boolean[] canEdit = new boolean[] { false, true };};
+    }
+
+    public void render(Graphics g) {
+        g.setColor(new Color(30, 50, 40));
+        g.fillPolygon(bounds);
+    }
+
+    @Override
+    public void tick() {
+    	bounds = new Polygon();
+        bounds.addPoint((int) x, (int) y);
+        bounds.addPoint((int) x + width, (int) y);
+        bounds.addPoint((int) x + width, (int) y + height);
+        bounds.addPoint((int) x, (int) y + height);
+        
+        
+    }
+
+	@Override
+	protected void updateAttributes(TableModel tableModel) {
+		x = Float.parseFloat((String) tableModel.getValueAt(0, 1));
+		System.out.println(tableModel.getValueAt(0, 1));
+		y = Float.parseFloat((String) tableModel.getValueAt(0, 1));
+		width = Integer.parseInt((String) tableModel.getValueAt(0, 1));
+		height =  Integer.parseInt((String) tableModel.getValueAt(0, 1));
+	}
+
+
+}

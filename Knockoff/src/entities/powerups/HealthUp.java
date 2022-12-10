@@ -10,6 +10,9 @@ public class HealthUp extends PowerUps {
 
 	public HealthUp(Handler handler, float x, float y) {
 		super(handler, x, y);
+		name = "Health Up";
+		icon = null;
+		floatingAsset = null;
 	}
 	
 	public void tick() {

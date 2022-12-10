@@ -10,6 +10,9 @@ public class MaxAmmo extends PowerUps{
 
 	public MaxAmmo(Handler handler, float x, float y) {
 		super(handler, x, y);
+		name = "Max Ammo";
+		icon = null;
+		floatingAsset = null;
 	}
 	
 	public void tick() {

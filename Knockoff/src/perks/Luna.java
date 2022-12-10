@@ -9,7 +9,7 @@ public class Luna extends Perk {
 	public Luna(Handler handler) {
 		super(handler);
 		this.name = "Luna";
-		this.icon = Assets.crawler;
+		this.icon = Assets.luna;
 	}
 	
 	Timer refresh = new Timer(10 * 60);

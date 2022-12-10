@@ -3,12 +3,16 @@ package entities.powerups;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import graphics.Assets;
 import main.Handler;
 
 public class InstaKill extends PowerUps{
 
 	public InstaKill(Handler handler, float x, float y) {
 		super(handler, x, y);
+		name = "InstaKill";
+		icon = Assets.instakill;
+		floatingAsset = null;
 	}
 
 	@Override

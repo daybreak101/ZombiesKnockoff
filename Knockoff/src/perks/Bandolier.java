@@ -1,12 +1,13 @@
 package perks;
 
+import graphics.Assets;
 import main.Handler;
 
 public class Bandolier extends Perk{
 	public Bandolier(Handler handler) {
 		super(handler);
 		this.name = "Bandolier";
-		this.icon = null;
+		this.icon = Assets.bandolier;
 		
 	}
 

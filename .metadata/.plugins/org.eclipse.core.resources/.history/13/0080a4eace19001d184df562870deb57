@@ -1,0 +1,70 @@
+package hud;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+
+import main.Handler;
+import weapons.Gun;
+
+public class GameplayElement extends HudElement {
+	
+	//grenades
+	private int grenades;
+
+	//gun
+	private Gun gun = handler.getWorld().getEntityManager().getPlayer().getInv().getGun();
+	private String output = "";
+	
+	public GameplayElement(Handler handler) {
+		super(0, 0, 0, 0, handler);
+		grenades = 0;
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void tick() {
+		//tick grenades
+		grenades = handler.getWorld().getEntityManager().getPlayer().getInv().getGrenades();
+		
+		//tick gun
+		gun = handler.getWorld().getEntityManager().getPlayer().getInv().getGun();
+		if(gun == null) 
+			output = "";
+		else
+			output = gun.getName() + "         " + gun.getCurrentClip() + " / " + gun.getCurrentReserve();
+		
+		
+	}
+
+	@Override
+	public void render(Graphics g) {
+		
+		//render grenades
+		g.setColor(Color.green);
+		for(int i = 0; i < 4; i++) {
+			g.drawOval((int) (handler.getWidth() - 300 + i*25), (int) (handler.getHeight() - 80), 20, 20);
+		}
+		for(int i = 0; i < grenades; i++) {
+			g.fillOval((int) (handler.getWidth() - 300 + i*25), (int) (handler.getHeight() - 80), 20, 20);
+		}
+		
+		//render gun
+		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 20)); 
+		g.drawString(output, (int) x, (int) y);
+		
+		if(gun == null) {
+			
+		}
+		else if(gun.getIsReloading()) 
+		{
+			g.setColor(Color.black);
+			g.fillRect((int) x, (int) y, width, height);
+			g.setColor(Color.green);
+		//	System.out.println((float) gun.getReloadTimer() / (float) gun.getReloadSpeed());
+			g.fillRect((int) x, (int) y,(int) (gun.getReloadProgress() * width), height);
+		}
+		
+	}
+
+}

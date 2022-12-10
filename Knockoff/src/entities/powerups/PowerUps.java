@@ -1,6 +1,7 @@
 package entities.powerups;
 
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 
 import entities.statics.InteractableStaticEntity;
 import main.Handler;
@@ -9,6 +10,9 @@ public abstract class PowerUps extends InteractableStaticEntity {
 	
 	protected boolean pickedUp = false;
 	protected int activeCounter;
+	protected String name;
+	protected BufferedImage icon;
+	protected BufferedImage floatingAsset;
 
 	public PowerUps(Handler handler, float x, float y) {
 		super(handler, x, y, 60, 60);
@@ -42,9 +46,28 @@ public abstract class PowerUps extends InteractableStaticEntity {
 	
 	public void checkPickedUp() {
 		if(trigger.intersects(handler.getWorld().getEntityManager().getPlayer().getCollisionBounds(0f, 0f))) {
+			
+			for(PowerUps e : handler.getWorld().getEntityManager().getPowerups()) {
+				if(e.getName() == this.name && e.isPickedUp() && e != this) {
+					handler.getWorld().getEntityManager().getPowerups().remove(e);
+					break;
+				}
+			}
 			pickedUp = true;
 		}
 	}
 	
+	public String getName() {
+		return name;
+	}
+	
 	public void unbuff() {}
+	
+	public boolean isPickedUp() {
+		return pickedUp;
+	}
+	
+	public BufferedImage getIcon() {
+		return icon;
+	}
 }
