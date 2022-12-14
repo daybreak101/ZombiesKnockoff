@@ -1,0 +1,39 @@
+package hud;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+
+import main.Handler;
+
+public class PointGainElement extends HudElement{
+
+	private int pointsGained;
+	private int alpha;
+	
+	public PointGainElement(Handler handler, int pointsGained) {
+		super(, , 0, 0, handler);
+		this.pointsGained = pointsGained;
+		alpha = 255;
+	}
+
+	@Override
+	public void tick() {
+		y--;
+		alpha--;
+		
+		if(alpha == 0)
+			handler.getHud().removeObject(this);
+		
+		
+	}
+
+	@Override
+	public void render(Graphics g) {
+		// TODO Auto-generated method stub
+		g.setColor(new Color(255, 255, 0, alpha));
+		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 20));
+		g.drawString("+" + pointsGained, (int) x, (int) y);
+	}
+
+}

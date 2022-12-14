@@ -2,6 +2,8 @@ package states;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 
 import hud.GameplayElement;
 import hud.HudManager;
@@ -42,13 +44,30 @@ public class GameState extends State {
 	}
 
 	int transparency = 255;
+	double zoomLevel = 1.0;
 	@Override
 	public void render(Graphics g) {
+		
+		//implementation on how to world without zooming HUD///////
+		if(zoomLevel > 1.5) {
+			zoomLevel = 1.5;
+		}
+		else if(zoomLevel < 0.5) {
+			zoomLevel = 0.5;
+		}
+		
+		Graphics2D g2d = (Graphics2D) g;
+		AffineTransform old = g2d.getTransform();
+		
+		old.scale(zoomLevel, zoomLevel);
+		g2d.setTransform(old);
+		/////////////////////////////////////////////////////////////
+		
 		world.render(g);
 		
-		//crosshair
-		g.setColor(Color.RED);
-		g.fillOval(handler.getMouseManager().getMouseX(), handler.getMouseManager().getMouseY(), 10, 10);
+		
+		old.scale(1/zoomLevel, 1/zoomLevel);
+		g2d.setTransform(old);
 		hud.render(g);
 		
 	if(transparency > 0){

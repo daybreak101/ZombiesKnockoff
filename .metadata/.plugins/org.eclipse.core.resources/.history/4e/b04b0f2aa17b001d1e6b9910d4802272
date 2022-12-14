@@ -1,0 +1,10 @@
+package settings;
+
+public class Settings {
+	
+	private Handler handler;
+	
+	public Settings(Handler handler) {
+		this.handler = handler;
+	}
+}

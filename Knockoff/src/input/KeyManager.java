@@ -10,7 +10,7 @@ public class KeyManager implements KeyListener {
 	public boolean reload, switchWeapon1, switchWeapon2, use, grenade, sprint, melee;
 	public boolean eAlreadyPressed = false;
 	public boolean b,c,e,f,g,h,i,j,k,l,m,n,o,p,q,r,t,u,v,x,y,z;
-	public boolean enter, backspace, escape;
+	public boolean enter, backspace, escape, capslock;
 	
 	
 	public KeyManager() {
@@ -56,6 +56,7 @@ public class KeyManager implements KeyListener {
 		enter = keys[KeyEvent.VK_ENTER];
 		backspace = keys[KeyEvent.VK_BACK_SPACE];
 		escape = keys[KeyEvent.VK_ESCAPE];
+		capslock = keys[KeyEvent.VK_CAPS_LOCK];
 		
 	}
 	

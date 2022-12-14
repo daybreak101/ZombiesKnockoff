@@ -1,0 +1,31 @@
+package hud;
+
+import java.awt.Color;
+import java.awt.Graphics;
+
+import main.Handler;
+
+public class Scoreboard extends HudElement {
+	
+	private Color hudColor;
+	private Stats stats;
+
+	public Scoreboard(Handler handler) {
+		super(400, 100, 0, 0, handler);
+		
+	}
+
+	@Override
+	public void tick() {
+		stats = handler.getPlayer().getStats();
+		hudColor = handler.getSettings().getHudColor();
+
+	}
+
+	@Override
+	public void render(Graphics g) {
+		
+		
+	}
+	
+}

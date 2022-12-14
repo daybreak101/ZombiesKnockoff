@@ -21,8 +21,13 @@ public class Assets {
 								powerup, doublepoints, instakill, deathmachine, infiniteammo,
 								
 								crawler, frozenZombie, iceEnhancedZombie;
+	
 	public static BufferedImage factoryMap;
-	public static BufferedImage[] zombieAnim, enhancedZombieAnim, btn_start, btn_quit, lickerAnim;
+	
+	public static BufferedImage[] zombieAnim, zombieAttackAnim,
+								  crawlerAnim, crawlerAttackAnim,
+								  enhancedZombieAnim, 
+								  btn_start, btn_quit, lickerAnim;
 
 	public static void init() {
 		SpriteSheet sheet2 = new SpriteSheet(ImageLoader.loadImage("/textures/Map.png"));
@@ -69,24 +74,61 @@ public class Assets {
 		zombieAnim[10] = zombieSheet.crop(6 * width, 0, width, height);
 		zombieAnim[9] = zombieSheet.crop(7 * width, 0, width, height);
 		
+		zombieAttackAnim = new BufferedImage[9];		
+		zombieAttackAnim[0] = zombieSheet.crop(2 * width, 2 * height, width, height);
+		zombieAttackAnim[1] = zombieSheet.crop(3 * width, 2 * height, width, height);
+		zombieAttackAnim[2] = zombieSheet.crop(4 * width, 2 * height, width, height);
+		zombieAttackAnim[3] = zombieSheet.crop(4 * width, 2 * height, width, height);
+		zombieAttackAnim[4] = zombieSheet.crop(3 * width, 2 * height, width, height);
+		zombieAttackAnim[5] = zombieSheet.crop(3 * width, 2 * height, width, height);
+		zombieAttackAnim[6] = zombieSheet.crop(2 * width, 2 * height, width, height);
+		zombieAttackAnim[7] = zombieSheet.crop(width, 2 * height, width, height);
+		zombieAttackAnim[8] = zombieSheet.crop(0, 2 * height, width, height);
+		
 		enhancedZombieAnim = new BufferedImage[17];
-		enhancedZombieAnim[0] = zombieSheet.crop(0, height, width, height);
-		enhancedZombieAnim[1] = zombieSheet.crop(width, height, width, height);
-		enhancedZombieAnim[2] = zombieSheet.crop(2 * width, height, width, height);
-		enhancedZombieAnim[3] = zombieSheet.crop(3 * width, height, width, height);
-		enhancedZombieAnim[4] = zombieSheet.crop(4 * width, height, width, height);
-		enhancedZombieAnim[5] = zombieSheet.crop(5 * width, height, width, height);
-		enhancedZombieAnim[6] = zombieSheet.crop(6 * width, height, width, height);
-		enhancedZombieAnim[7] = zombieSheet.crop(7 * width, height, width, height);
-		enhancedZombieAnim[8] = zombieSheet.crop(8 * width, height, width, height);
-		enhancedZombieAnim[16] = zombieSheet.crop(0, height, width, height);
-		enhancedZombieAnim[15] = zombieSheet.crop(width, height, width, height);
-		enhancedZombieAnim[14] = zombieSheet.crop(2 * width, height, width, height);
-		enhancedZombieAnim[13] = zombieSheet.crop(3 * width, height, width, height);
-		enhancedZombieAnim[12] = zombieSheet.crop(4 * width, height, width, height);
-		enhancedZombieAnim[11] = zombieSheet.crop(5 * width, height, width, height);
-		enhancedZombieAnim[10] = zombieSheet.crop(6 * width, height, width, height);
-		enhancedZombieAnim[9] = zombieSheet.crop(7 * width, height, width, height);
+		for(int i = 0; i < 9; i++) {
+			enhancedZombieAnim[i] = zombieSheet.crop(i * width, height, width, height);
+		}
+		for(int i = 9; i < 17; i++) {
+			enhancedZombieAnim[i] = enhancedZombieAnim[16 - i];
+		}
+//		enhancedZombieAnim[0] = zombieSheet.crop(0, height, width, height);
+//		enhancedZombieAnim[1] = zombieSheet.crop(width, height, width, height);
+//		enhancedZombieAnim[2] = zombieSheet.crop(2 * width, height, width, height);
+//		enhancedZombieAnim[3] = zombieSheet.crop(3 * width, height, width, height);
+//		enhancedZombieAnim[4] = zombieSheet.crop(4 * width, height, width, height);
+//		enhancedZombieAnim[5] = zombieSheet.crop(5 * width, height, width, height);
+//		enhancedZombieAnim[6] = zombieSheet.crop(6 * width, height, width, height);
+//		enhancedZombieAnim[7] = zombieSheet.crop(7 * width, height, width, height);
+//		enhancedZombieAnim[8] = zombieSheet.crop(8 * width, height, width, height);
+//		enhancedZombieAnim[16] = zombieSheet.crop(0, height, width, height);
+//		enhancedZombieAnim[15] = zombieSheet.crop(width, height, width, height);
+//		enhancedZombieAnim[14] = zombieSheet.crop(2 * width, height, width, height);
+//		enhancedZombieAnim[13] = zombieSheet.crop(3 * width, height, width, height);
+//		enhancedZombieAnim[12] = zombieSheet.crop(4 * width, height, width, height);
+//		enhancedZombieAnim[11] = zombieSheet.crop(5 * width, height, width, height);
+//		enhancedZombieAnim[10] = zombieSheet.crop(6 * width, height, width, height);
+//		enhancedZombieAnim[9] = zombieSheet.crop(7 * width, height, width, height);
+		
+		crawlerAnim = new BufferedImage[20];
+		for(int i = 0; i < 11; i++) {
+			crawlerAnim[i] = zombieSheet.crop(i * width, 4 * height, width, height);
+		}
+		for(int i = 11; i < 20; i++) {
+			crawlerAnim[i] = crawlerAnim[20 - i];
+		}
+		
+		crawlerAttackAnim = new BufferedImage[11];	
+		for(int i = 0; i < 6; i++) {
+			crawlerAttackAnim[i] = zombieSheet.crop(i * width, 5 * height, width, height);
+		}
+		for(int i = 6; i < 11; i++) {
+			crawlerAttackAnim[i] = crawlerAttackAnim[10 - i];
+		}
+
+
+
+		
 		
 		crawler = sheet.crop(3 * width, height, width, height);
 		frozenZombie = sheet.crop(5 * width, height, width, height);

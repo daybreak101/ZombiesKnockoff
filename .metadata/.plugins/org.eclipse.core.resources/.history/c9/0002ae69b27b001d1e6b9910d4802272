@@ -1,0 +1,24 @@
+package entities.creatures.playerinfo;
+
+import main.Handler;
+
+public class Stats {
+
+	private Handler handler;
+	private int kills, downs, score;
+	
+	public Stats(Handler handler) {
+		this.setHandler(handler);
+		kills = 0;
+		score = 0;
+		downs = 0;
+	}
+
+	public Handler getHandler() {
+		return handler;
+	}
+
+	public void setHandler(Handler handler) {
+		this.handler = handler;
+	}
+}

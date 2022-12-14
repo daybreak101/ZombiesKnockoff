@@ -80,7 +80,7 @@ public class Licker extends Zombie {
 			g2d.fillOval((int) (x + 10 - handler.getGameCamera().getxOffset()),
 					(int) (y + 10 - handler.getGameCamera().getyOffset()), 70, 70);
 		}
-		g2d.drawImage(getCurrentAnimationFrame(), (int) (x - handler.getGameCamera().getxOffset()),
+		g2d.drawImage(zombieAnim.getCurrentFrame(), (int) (x - handler.getGameCamera().getxOffset()),
 				(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 	
 		g2d.setTransform(old);

@@ -1,0 +1,29 @@
+package hud;
+
+import java.awt.Graphics;
+
+import main.Handler;
+
+public class PointGainElement extends HudElement{
+
+	private pointsGained;
+	
+	public PointGainElement(Handler handler, int pointsGained) {
+		super(x, y, width, height, handler);
+		this.pointsGained = pointsGained;
+	}
+
+	@Override
+	public void tick() {
+		y--;
+		
+		
+	}
+
+	@Override
+	public void render(Graphics g) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

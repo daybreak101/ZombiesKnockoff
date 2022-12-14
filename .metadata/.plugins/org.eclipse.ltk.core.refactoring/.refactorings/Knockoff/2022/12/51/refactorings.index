@@ -1,0 +1,9 @@
+1670723154207	Move file
+1671017546799	Encapsulate field 'hudColor'
+1671017606364	Move compilation unit
+1671017613059	Delete element
+1671017646899	Encapsulate field 'settings'
+1671024148262	Encapsulate field 'handler'
+1671024181565	Encapsulate field 'kills'
+1671024187267	Encapsulate field 'downs'
+1671024196156	Encapsulate field 'score'

@@ -1,0 +1,5 @@
+package entities.creatures.playerinfo;
+
+public class Stats {
+
+}

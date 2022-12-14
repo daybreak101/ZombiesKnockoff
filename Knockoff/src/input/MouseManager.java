@@ -12,7 +12,8 @@ import ui.UIManager;
 
 public class MouseManager implements MouseListener, MouseMotionListener, MouseWheelListener{
 	
-	private boolean leftPressed, rightPressed, mouseScrolled;
+	private boolean leftPressed, rightPressed, mouseScrolled,
+					wheelUp, wheelDown;
 	public boolean attack;
 	private int mouseX, mouseY;
 	private Handler handler;
@@ -41,6 +42,7 @@ public class MouseManager implements MouseListener, MouseMotionListener, MouseWh
 	public boolean isMouseScrolled() {
 		return mouseScrolled;
 	}
+	
 	
 	public int getMouseX() {
 		return mouseX;
@@ -121,6 +123,19 @@ public class MouseManager implements MouseListener, MouseMotionListener, MouseWh
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		mouseScrolled = true;
+		if(e.isControlDown()) {
+			if(e.getWheelRotation() < 0) {
+				//mouse wheel up
+				wheelUp = true;
+				
+				//to get value of how much rotation
+				//e.getPreciseWheelRotation();
+			}
+			else {
+				//mouse wheel down
+				wheelDown = true;
+			}
+		}
 	}
 
 	public void setMouseScrolled(boolean mouseScrolled) {

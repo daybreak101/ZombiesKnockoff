@@ -3,19 +3,24 @@ package entities.powerups;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
-import entities.statics.InteractableStaticEntity;
+import entities.statics.StaticEntity;
 import main.Handler;
 
-public abstract class PowerUps extends InteractableStaticEntity {
+public abstract class PowerUps extends StaticEntity {
 	
+	protected Handler handler;
+	protected int cooldown, cooldownTimer;
 	protected boolean pickedUp = false;
 	protected int activeCounter;
 	protected String name;
 	protected BufferedImage icon;
 	protected BufferedImage floatingAsset;
+	protected Rectangle trigger;
 
 	public PowerUps(Handler handler, float x, float y) {
 		super(handler, x, y, 60, 60);
+		this.handler = handler;
+		trigger = new Rectangle(0,0,0,0);
 		bounds = new Rectangle(0,0,0,0);
 		cooldown = 1800;
 		activeCounter = 0;
@@ -70,4 +75,7 @@ public abstract class PowerUps extends InteractableStaticEntity {
 	public BufferedImage getIcon() {
 		return icon;
 	}
+	
+	public void fulfillInteraction() {}
+	public void postTick() {}
 }

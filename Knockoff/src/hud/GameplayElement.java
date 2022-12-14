@@ -5,12 +5,15 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import entities.creatures.Player;
 import entities.powerups.PowerUps;
+import entities.statics.InteractableStaticEntity;
 import graphics.Assets;
 import main.Handler;
 import perks.Perk;
@@ -22,7 +25,8 @@ public class GameplayElement extends HudElement {
 	private String gunText = "", interactText = "";
 	private Perk[] perks;
 	private Gun gun;// = handler.getWorld().getEntityManager().getPlayer().getInv().getGun();
-
+	private Color hudColor;
+	
 	public GameplayElement(Handler handler) {
 		super(0, 0, 0, 0, handler);
 		maxStamina = 1;
@@ -34,10 +38,22 @@ public class GameplayElement extends HudElement {
 	@Override
 	public void tick() {
 		Player player = handler.getWorld().getEntityManager().getPlayer();
-
+		hudColor = handler.getSettings().getHudColor();
+		
 		grenades = player.getInv().getGrenades();
 		health = player.getHealth();
-		interactText = player.interactableText();
+		
+		
+		interactText = "";
+		Ellipse2D.Float radius = new Ellipse2D.Float(handler.getPlayer().getX() - 100, handler.getPlayer().getY() - 100, 200, 200);
+		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
+			if (e != null) {
+				if(radius.intersects(e.getTriggerRange())) {
+					interactText =  e.getTriggerText();
+				}
+			}
+		}
+		
 		perks = player.getInv().getPerks();
 		points = player.getInv().getPoints();
 		currentStamina = player.getCurrentStamina();
@@ -56,7 +72,7 @@ public class GameplayElement extends HudElement {
 
 	public void renderGrenades(Graphics g) {
 		// render grenades
-		g.setColor(Color.green);
+		g.setColor(hudColor);
 
 		for (int i = 0; i < 4; i++) {
 			g.drawOval((int) (handler.getWidth() - 300 + i * 25), (int) (handler.getHeight() - 80), 20, 20);
@@ -76,7 +92,7 @@ public class GameplayElement extends HudElement {
 		} else if (gun.getIsReloading()) {
 			g.setColor(Color.black);
 			g.fillRect((int) handler.getWidth() - 300, (int) handler.getHeight() - 100, 100, 10);
-			g.setColor(Color.green);
+			g.setColor(hudColor);
 			g.fillRect((int) handler.getWidth() - 300, (int) handler.getHeight() - 100,
 					(int) (gun.getReloadProgress() * 100), 10);
 		}
@@ -87,7 +103,7 @@ public class GameplayElement extends HudElement {
 		g.setColor(Color.RED);
 		g.fillRect((int) 100, (int) handler.getHeight() - 100, 100, 50);
 
-		g.setColor(Color.GREEN);
+		g.setColor(hudColor);
 		g.fillRect((int) 100, (int) handler.getHeight() - 100, health, 50);
 
 		g.setColor(Color.BLUE);
@@ -97,7 +113,7 @@ public class GameplayElement extends HudElement {
 	public void renderInteractionText(Graphics g) {
 		// render interact
 		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 20));
-		g.setColor(Color.green);
+		g.setColor(hudColor);
 		g.drawString(interactText, (int) handler.getWidth() / 2 - 190, (int) handler.getHeight() / 2 + 200);
 
 	}
@@ -217,7 +233,7 @@ public class GameplayElement extends HudElement {
 		g.setColor(Color.BLACK);
 		g.fillRect((int) 100, (int) handler.getHeight() - 120, 100, 10);
 
-		g.setColor(Color.green);
+		g.setColor(hudColor);
 		if (maxStamina != 0)
 			g.fillRect((int) 100, (int) handler.getHeight() - 120, (int) ((currentStamina * 100 / maxStamina)), 10);
 	}

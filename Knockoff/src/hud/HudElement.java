@@ -10,6 +10,8 @@ public abstract class HudElement {
 	protected int width, height;
 	protected Rectangle bounds;
 	protected Handler handler;
+	protected boolean isVisible;
+	protected boolean isActive;
 	
 	public HudElement(float x, float y, int width, int height, Handler handler) {
 		this.x = x;
@@ -17,6 +19,8 @@ public abstract class HudElement {
 		this.width = width;
 		this.height = height;
 		this.handler = handler;
+		isVisible = true;
+		isActive = true;
 		bounds = new Rectangle((int) x, (int) y, width, height);
 	}
 	
@@ -25,6 +29,14 @@ public abstract class HudElement {
 	
 	public float getX() {
 		return x;
+	}
+	
+	public boolean isVisible() {
+		return isVisible;
+	}
+	
+	public void setVisible(boolean visible) {
+		isVisible = visible;
 	}
 
 

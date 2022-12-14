@@ -10,21 +10,25 @@ import java.awt.geom.Ellipse2D;
 import entities.areas.Areas;
 import entities.bullets.Grenade;
 import entities.creatures.playerinfo.Inventory;
+import entities.creatures.playerinfo.Stats;
 import entities.statics.InteractableStaticEntity;
 import entities.statics.traps.IcyWater;
 import graphics.Assets;
+import hud.GameplayElement;
 import hud.LeaderboardElement;
+import hud.PointGainElement;
+import hud.Scoreboard;
 import main.Handler;
 import perks.Perk;
 import states.PauseState;
 import states.State;
 import utils.Timer;
-import utils.Utils;
 import weapons.Gun;
 
 public class Player extends Creature {
 
 	Inventory inv;
+	Stats stats;
 	Rectangle cb;
 	int timer = 0;
 	private float weight;
@@ -46,6 +50,7 @@ public class Player extends Creature {
 	public Player(Handler handler, float x, float y) {
 		super(handler, x, y, Creature.DEFAULT_CREATURE_WIDTH, Creature.DEFAULT_CREATURE_HEIGHT);
 		inv = new Inventory(handler, this);
+		stats = new Stats(handler);
 		bounds.x = 0;
 		bounds.y = 0;
 		bounds.width = 75;
@@ -71,16 +76,15 @@ public class Player extends Creature {
 		} else {
 			checkIfInIcyWater();
 			freezing();
-			
-			if(isFrozen)
+
+			if (isFrozen)
 				getInput();
-				breakCooldown.tick();
+			breakCooldown.tick();
 			if (!isFrozen) {
 				isSprinting = 1;
-				
+
 				move();
-				
-				
+
 				if (inv.getGun() != null) {
 					inv.getGun().tick();
 					weight = inv.getGun().getWeight();
@@ -92,8 +96,6 @@ public class Player extends Creature {
 				getInput();
 				handler.getGameCamera().centerOnEntity(this);
 
-				
-				
 				sprinting();
 				burn();
 			}
@@ -125,21 +127,21 @@ public class Player extends Creature {
 			inWater = false;
 		}
 	}
-	
+
 	Timer breakCooldown = new Timer(60);
 	private int breakCounter = 0;
+
 	public void breakFreeFromIce() {
-		if(breakCooldown.isReady()) {
+		if (breakCooldown.isReady()) {
 			breakCooldown.resetTimer();
 			breakCounter++;
 		}
-		if(breakCounter >= 3) {
+		if (breakCounter >= 3) {
 			breakCounter = 0;
 			isFrozen = false;
 			iceCounter = 0;
 		}
 	}
-	
 
 	Timer overallBurnTimer = new Timer(300);
 	Timer tickBurnTimer = new Timer(60);
@@ -212,6 +214,7 @@ public class Player extends Creature {
 
 	public void die() {
 		if (!died) {
+			stats.gainDown();
 			died = true;
 			System.out.println("YOU LOSE");
 			handler.getHud().getObjects().clear();
@@ -287,7 +290,7 @@ public class Player extends Creature {
 				inv.getKnife().damageNearbyZombie();
 			}
 		}
-		if(isFrozen) {
+		if (isFrozen) {
 			if (handler.getKeyManager().melee) {
 				breakFreeFromIce();
 			}
@@ -295,7 +298,17 @@ public class Player extends Creature {
 		if (handler.getKeyManager().escape) {
 			State.setState(new PauseState(handler));
 		}
-
+		if (handler.getKeyManager().capslock) {
+			handler.getHud().getGameplayHUD().setVisible(false);
+			handler.getHud().getScoreboard().setVisible(true);
+			//handler.getHud().getObjects().clear();
+			//handler.getHud().getObjects().add(new Scoreboard(handler));
+		} else {
+			handler.getHud().getScoreboard().setVisible(false);
+			handler.getHud().getGameplayHUD().setVisible(true);
+			//handler.getHud().getObjects().clear();
+			//handler.getHud().getObjects().add(new GameplayElement(handler));
+		}
 
 	}
 
@@ -318,11 +331,9 @@ public class Player extends Creature {
 	}
 
 	public void interact() {
+		Ellipse2D.Float radius = new Ellipse2D.Float(x - 100, y - 100, 200, 200);
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (e.getTriggerRange()
-					.intersects(new Rectangle((int) (x + bounds.x - handler.getGameCamera().getxOffset() - 50),
-							(int) (y + bounds.y - handler.getGameCamera().getyOffset() - 50), bounds.width + 100,
-							bounds.height + 100))) {
+			if (radius.intersects(e.getTriggerRange())) {
 				e.fulfillInteraction();
 			}
 		}
@@ -383,12 +394,11 @@ public class Player extends Creature {
 		} else {
 			g2d.rotate(Math.toRadians(angle), x - handler.getGameCamera().getxOffset() + width / 2,
 					y - handler.getGameCamera().getyOffset() + height / 2);
-			if(isFrozen) {
+			if (isFrozen) {
 				g2d.drawImage(Assets.player[4], (int) (x - handler.getGameCamera().getxOffset()),
 						(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 
-			}
-			else if (justTookDamage == true) {
+			} else if (justTookDamage == true) {
 				g2d.drawImage(Assets.player[1], (int) (x - handler.getGameCamera().getxOffset()),
 						(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 
@@ -409,20 +419,6 @@ public class Player extends Creature {
 		}
 	}
 
-	public String interactableText() {
-		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (e != null) {
-				if (e.getTriggerRange()
-						.intersects(new Rectangle((int) (x + bounds.x - handler.getGameCamera().getxOffset() - 50),
-								(int) (y + bounds.y - handler.getGameCamera().getyOffset() - 50), bounds.width + 100,
-								bounds.height + 100))) {
-					return e.getTriggerText();
-				}
-			}
-		}
-		return "";
-	}
-
 	public void maxAmmo() {
 		inv.maxAmmo();
 	}
@@ -441,6 +437,8 @@ public class Player extends Creature {
 
 	public void gainPoints(int add) {
 		inv.gainPoints(add);
+		stats.gainScore(add);
+		handler.getHud().addObject(new PointGainElement(handler, add));
 	}
 
 	public boolean purchase(int price) {
@@ -458,12 +456,12 @@ public class Player extends Creature {
 			armor = 50;
 		}
 	}
-	
+
 	public void gainStrongholdDamageMultiplier(float dDamageMultiplier) {
-		if(strongholdDamageMultiplier < 1f) {
+		if (strongholdDamageMultiplier < 1f) {
 			strongholdDamageMultiplier += dDamageMultiplier;
 		}
-		if(strongholdDamageMultiplier > 1f) {
+		if (strongholdDamageMultiplier > 1f) {
 			strongholdDamageMultiplier = 1f;
 		}
 	}
@@ -473,9 +471,9 @@ public class Player extends Creature {
 			armor = 0;
 		}
 	}
-	
+
 	public void removeStrongholdDamageMultiplier() {
-		if(strongholdDamageMultiplier > 0) {
+		if (strongholdDamageMultiplier > 0) {
 			strongholdDamageMultiplier = 0;
 		}
 	}
@@ -483,7 +481,7 @@ public class Player extends Creature {
 	public int getArmor() {
 		return armor;
 	}
-	
+
 	public float getStrongholdDamageMultiplier() {
 		return strongholdDamageMultiplier;
 	}
@@ -562,6 +560,10 @@ public class Player extends Creature {
 
 	public Inventory getInv() {
 		return inv;
+	}
+
+	public Stats getStats() {
+		return stats;
 	}
 
 }

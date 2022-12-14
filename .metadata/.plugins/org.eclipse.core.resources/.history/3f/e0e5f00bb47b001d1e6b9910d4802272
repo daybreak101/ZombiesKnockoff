@@ -1,0 +1,29 @@
+package hud;
+
+import java.awt.Graphics;
+
+import entities.creatures.playerinfo.Stats;
+import main.Handler;
+
+public class Scoreboard extends HudElement {
+	
+	Stats stats;
+
+	public Scoreboard(Handler handler) {
+		super(400, 100, 0, 0, handler);
+		
+	}
+
+	@Override
+	public void tick() {
+		stats = handler.getPlayer().getStats();
+		
+	}
+
+	@Override
+	public void render(Graphics g) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}

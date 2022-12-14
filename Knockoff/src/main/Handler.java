@@ -15,6 +15,7 @@ public class Handler {
 	private Player player;
 	private RoundLogic rounds;
 	private HudManager hud;
+	private Settings settings;
 	
 	public Player getPlayer() {
 		return player;
@@ -26,6 +27,7 @@ public class Handler {
 
 	public Handler(Game game) {
 		this.game = game;
+		settings = new Settings(this);
 	}
 	
 	public GameCamera getGameCamera() {
@@ -76,6 +78,10 @@ public class Handler {
 
 	public void setHud(HudManager hud) {
 		this.hud = hud;
+	}
+
+	public Settings getSettings() {
+		return settings;
 	}
 	
 	

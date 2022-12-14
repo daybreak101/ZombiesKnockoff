@@ -4,8 +4,8 @@ import main.Handler;
 import perks.DoubleTap;
 import perks.Stronghold;
 import perks.Vampire;
-import weapons.Flamethrower;
 import weapons.Gun;
+import weapons.IceShotgun;
 
 public class Cheats {
 
@@ -36,13 +36,13 @@ public class Cheats {
 		handler.getPlayer().gainPoints(points);
 
 		// set round
-		int round = 10;
+		int round = 0;
 		handler.getRoundLogic().setCurrentRound(round);
 
 		// give gun
 		//Gun gun = new RPG(handler);
-		Gun gun = new Flamethrower(handler);
-		//Gun gun = new IceShotgun(handler);
+		//Gun gun = new Flamethrower(handler);
+		Gun gun = new IceShotgun(handler);
 		gun.upgradeWeapon();
 		handler.getPlayer().getInv().setGun(gun);
 

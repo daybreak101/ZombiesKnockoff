@@ -23,13 +23,15 @@ import utils.Graph;
 
 public class Zombie extends Creature {
 
-	protected Animation zombieAnim;
+	protected Animation zombieAnim, zombieAttackAnim, 
+						crawlerAnim, crawlerAttackAnim,
+						enhancedZombieAnim, enhancedZombieAttackAnim;
 	protected boolean justAttacked = false;
 	protected long timer = 0;
 	protected int attackTicker = 0, attackTimer = 100;
 	private int attackDamage;
 	Random rand = new Random();
-	private float angley = rand.nextInt(10000), anglex = rand.nextInt(10000);
+	private float angley = rand.nextInt(handler.getWorld().getHeight()), anglex = rand.nextInt(handler.getWorld().getWidth());
 	Graph graph;
 	int goTo = 0;
 	private int source, player;
@@ -53,6 +55,8 @@ public class Zombie extends Creature {
 		super(handler, x, y, Creature.DEFAULT_CREATURE_WIDTH, Creature.DEFAULT_CREATURE_HEIGHT);
 		zombieType = ZOMBIE;
 		zombieAnim = new Animation(150, Assets.zombieAnim);
+		zombieAttackAnim = new Animation(100, Assets.zombieAttackAnim, true);
+		crawlerAnim = new Animation(100, Assets.crawlerAnim);
 		speed = 1.8f + dspeed;
 		attackDamage = 10;
 		this.health = health;
@@ -89,8 +93,6 @@ public class Zombie extends Creature {
 			player = (int) (((int) ((handler.getPlayer().getX() + 32.5) / 100))
 					+ ((int) ((handler.getPlayer().getY() + 32.5) / 100)) * handler.getWorld().getWidth());
 
-			
-			
 			slowdown = 1;
 			if (inWater) {
 				slowdown += .5;
@@ -146,7 +148,7 @@ public class Zombie extends Creature {
 	public void checkIfInIcyWater() {
 		boolean found = false;
 		for (Areas e : handler.getWorld().getEntityManager().getAreas()) {
-			if (((IcyWater) e).checkIfEntityIsContained(getHitBox(0,0))) {
+			if (((IcyWater) e).checkIfEntityIsContained(getHitBox(0, 0))) {
 				inWater = true;
 				found = true;
 			}
@@ -155,7 +157,6 @@ public class Zombie extends Creature {
 			inWater = false;
 		}
 	}
-
 
 	public void takeDamage(int amount) {
 
@@ -191,7 +192,7 @@ public class Zombie extends Creature {
 	public void freezeNearbyZombies() {
 		Ellipse2D freezeRadius = new Ellipse2D.Float(x + width / 2 - 100, y + height / 2 - 100, 200, 200);
 		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
-			if (freezeRadius.intersects(e.getHitBox(0, 0))) {
+			if (freezeRadius.intersects(e.getHitBox(0, 0)) && e != this) {
 				e.freeze();
 			}
 		}
@@ -229,8 +230,12 @@ public class Zombie extends Creature {
 	}
 
 	public void postTick() {
-		if (!justAttacked || !isFrozen)
+		if (!justAttacked && !isFrozen)
 			zombieAnim.tick();
+		else if (justAttacked && !isFrozen) {
+			zombieAttackAnim.tick();
+		}
+
 	}
 
 	public void dontMove() {
@@ -297,6 +302,7 @@ public class Zombie extends Creature {
 		if (justAttacked == true) {
 			timer++;
 			if (timer == 100) {
+				zombieAttackAnim.resetAnim();
 				justAttacked = false;
 				timer = 0;
 			}
@@ -390,6 +396,7 @@ public class Zombie extends Creature {
 		if (justAttacked == true) {
 			timer++;
 			if (timer == 100) {
+				zombieAttackAnim.resetAnim();
 				justAttacked = false;
 				timer = 0;
 			}
@@ -421,14 +428,15 @@ public class Zombie extends Creature {
 				+ handler.getPlayer().getWidth() / 2;
 		float moveToY = handler.getPlayer().getY() - handler.getGameCamera().getyOffset()
 				+ handler.getPlayer().getHeight() / 2;
-		if (!isFrozen) {
+		if (!isFrozen && !justAttacked) {
 			rotationAngle = (float) Math
 					.toDegrees(Math.atan2(-(x - handler.getGameCamera().getxOffset() - moveToX + width / 2),
 							y - handler.getGameCamera().getyOffset() - moveToY + height / 2));
 		}
 
-		g.drawImage(Assets.shadow, (int) (x - handler.getGameCamera().getxOffset()),
-				(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
+		if (!isCrawler)
+			g.drawImage(Assets.shadow, (int) (x - handler.getGameCamera().getxOffset()),
+					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 
 		if (isBurning) {
 			g.setColor(Color.orange);
@@ -440,16 +448,18 @@ public class Zombie extends Creature {
 		AffineTransform old = g2d.getTransform();
 		g2d.rotate(Math.toRadians(rotationAngle), x - handler.getGameCamera().getxOffset() + width / 2,
 				y - handler.getGameCamera().getyOffset() + height / 2);
-		
-		if(isFrozen) {
+
+		if (isFrozen) {
 			g2d.drawImage(Assets.frozenZombie, (int) (x - handler.getGameCamera().getxOffset()),
 					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
-		}
-		else if (isCrawler) {
+		} else if (isCrawler) {
 			g2d.drawImage(Assets.crawler, (int) (x - handler.getGameCamera().getxOffset()),
 					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
+		} else if (justAttacked) {
+			g2d.drawImage(zombieAttackAnim.getCurrentFrame(), (int) (x - handler.getGameCamera().getxOffset()),
+					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 		} else {
-			g2d.drawImage(getCurrentAnimationFrame(), (int) (x - handler.getGameCamera().getxOffset()),
+			g2d.drawImage(zombieAnim.getCurrentFrame(), (int) (x - handler.getGameCamera().getxOffset()),
 					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 		}
 
@@ -457,15 +467,12 @@ public class Zombie extends Creature {
 
 	}
 
-	protected BufferedImage getCurrentAnimationFrame() {
-		return zombieAnim.getCurrentFrame();
-	}
-
 	@Override
 	public void die() {
 		if (handler.getPlayer().getInv().isVamp())
 			handler.getPlayer().incrementHealth();
 
+		handler.getPlayer().getStats().gainKill();
 		handler.getWorld().getEntityManager().addBlood(new Blood(handler, x, y, zombieType));
 
 		if (handler.getRoundLogic().getPowerups().isPowerUpReady()) {
@@ -510,7 +517,7 @@ public class Zombie extends Creature {
 	public int getZombieType() {
 		return zombieType;
 	}
-	
+
 	public boolean isFrozen() {
 		return isFrozen;
 	}

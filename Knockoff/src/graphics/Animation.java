@@ -31,7 +31,8 @@ public class Animation {
 	public void tick() {
 		timer += System.currentTimeMillis() - lastTime;
 		lastTime = System.currentTimeMillis();
-		//if animation ends at last index
+		//if animation ends at last index	
+
 		if(stops && timer > speed && index < frames.length) {
 			index++;
 			timer = 0;
@@ -43,6 +44,13 @@ public class Animation {
 			if(index >= frames.length)
 				index = 0;
 		}
+		if(stops && index >= frames.length - 1) {
+			index = frames.length - 1;
+		}
+	}
+	
+	public void resetAnim() {
+		index = 0;
 	}
 	
 	public BufferedImage getCurrentFrame() {

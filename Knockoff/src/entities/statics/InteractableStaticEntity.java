@@ -20,7 +20,8 @@ public abstract class InteractableStaticEntity extends StaticEntity{
 	
 	public void tick() {
 		cooldownTimer++;
-		trigger = new Rectangle((int) (x + bounds.x  - handler.getGameCamera().getxOffset() - 5), (int) (y + bounds.y  - handler.getGameCamera().getyOffset() - 5), bounds.width + 10, bounds.height + 10);
+		//trigger = new Rectangle((int) (x + bounds.x  - handler.getGameCamera().getxOffset() - 5), (int) (y + bounds.y  - handler.getGameCamera().getyOffset() - 5), bounds.width + 10, bounds.height + 10);
+		trigger = new Rectangle((int) (x + bounds.x - 100), (int) (y + bounds.y - 100), bounds.width + 100, bounds.height + 100);
 		postTick();
 	}
 	
