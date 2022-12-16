@@ -1,8 +1,16 @@
 package entities.creatures.playerinfo;
 
 import java.awt.Graphics;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Ellipse2D.Float;
 
+import entities.Entity;
 import entities.creatures.Player;
+import entities.creatures.Zombie;
+import entities.statics.InteractableStaticEntity;
+import hud.PointGainElement;
+import input.MouseManager;
 import main.Handler;
 import perks.Perk;
 import utils.Timer;
@@ -27,8 +35,8 @@ public class Inventory {
 	private Timer grenadeReadyTimer;
 
 	// perk variables
-	private boolean jugg, doubletap, speedcola, deadshot, staminup, phd, 
-	vamp, mule, bandolier, stronghold, revive, luna;
+	private boolean jugg, doubletap, speedcola, deadshot, staminup, phd, vamp, mule, bandolier, stronghold, revive,
+			luna;
 	public boolean strongholdActivation = false;
 
 	public Inventory(Handler handler, Player player) {
@@ -53,7 +61,7 @@ public class Inventory {
 		knife = new Knife(handler);
 		gasMask = new GasMask(handler);
 		gasMask.setCurrentDurability(0);
-		
+
 		grenades = 0;
 
 		points = 500;
@@ -76,25 +84,34 @@ public class Inventory {
 		switchWeaponTimer.tick();
 		grenadeReadyTimer.tick();
 		knife.tick();
-		for(Perk i : perks) {
-			if(i != null) {
+		for (Perk i : perks) {
+			if (i != null) {
 				i.tick();
 			}
 		}
 	}
-	
+
 	public void render(Graphics g) {
+		drawLaser(g);
 		knife.render(g);
-		for(Perk i : perks) {
-			if(i != null) {
+		for (Perk i : perks) {
+			if (i != null) {
 				i.render(g);
 			}
 		}
 	}
 
+	public void drawLaser(Graphics g) {
+		MouseManager mouse = handler.getMouseManager();
+		int size = 7;
+		g.setColor(handler.getSettings().getLaserColor());
+
+		g.fillOval(mouse.getMouseX() - size / 2, mouse.getMouseY() - size / 2, size, size);
+	}
+
 	public void wipePerksWhenDowned() {
-		for(Perk p : perks) {
-			if(p != null)
+		for (Perk p : perks) {
+			if (p != null)
 				p.debuff();
 		}
 		/*
@@ -213,15 +230,19 @@ public class Inventory {
 			grenades = 4;
 		}
 	}
-	
+
 	public void gainPoints(int add) {
 		if (handler.getRoundLogic().getPowerups().isDoublePointsActive()) {
 			points += (add * 2);
+			player.getStats().gainScore(add * 2);
+			handler.getHud().addObject(new PointGainElement(handler, add));
 		} else {
 			points += add;
+			player.getStats().gainScore(add);
+			handler.getHud().addObject(new PointGainElement(handler, add));
 		}
 	}
-	
+
 	public boolean purchase(int price) {
 		if (price <= points) {
 			points -= price;
@@ -229,7 +250,7 @@ public class Inventory {
 		}
 		return false;
 	}
-	
+
 	public void setGun(Gun gun) {
 		if (arsenal[0] == null) {
 			arsenal[0] = gun;
@@ -243,7 +264,7 @@ public class Inventory {
 		} else
 			arsenal[currentGun] = gun;
 	}
-	
+
 	public boolean checkArsenal(Gun gun) {
 		for (int i = 0; i < 3; i++) {
 			if (arsenal[i] != null) {
@@ -265,7 +286,7 @@ public class Inventory {
 		}
 		return false;
 	}
-	
+
 	public void addPerk(Perk perk) {
 		for (int i = 0; i < 4; i++) {
 			if (perks[i] == null) {
@@ -275,7 +296,7 @@ public class Inventory {
 			}
 		}
 	}
-	
+
 	public boolean checkPerkEmptySpot() {
 		for (int i = 0; i < 4; i++) {
 			if (perks[i] == null) {
@@ -284,29 +305,28 @@ public class Inventory {
 		}
 		return false;
 	}
-	
-	
+
 	public void removeGunForUpgrade() {
 		arsenal[currentGun] = null;
 		switchWeapon();
 	}
-	
+
 	public Gun[] getArsenal() {
 		return arsenal;
 	}
-	
+
 	public Knife getKnife() {
 		return knife;
 	}
-	
+
 	public void setKnife(Knife newMelee) {
 		knife = newMelee;
 	}
-	
+
 	public void setGasMask(GasMask gasMask) {
 		this.gasMask = gasMask;
 	}
-	
+
 	public GasMask getGasMask() {
 		return gasMask;
 	}
@@ -427,10 +447,9 @@ public class Inventory {
 	public boolean isLuna() {
 		return luna;
 	}
-	
+
 	public void setLuna(boolean luna) {
 		this.luna = luna;
 	}
-	
-	
+
 }

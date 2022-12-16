@@ -186,6 +186,7 @@ public class RoundLogic {
 		zombiesLeft = zpr;
 		powerups.resetManager();
 		handler.getWorld().getEntityManager().getPlayer().roundReplenishGrenades();
+		handler.getGlobalStats().writeToFile();
 	}
 
 	public void calculateSpawnRate() {

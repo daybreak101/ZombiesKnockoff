@@ -1,20 +1,32 @@
 package entities.creatures.playerinfo;
 
+import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import main.Handler;
+import utils.Utils;
 
 public class Stats {
 
 	private Handler handler;
+	//current game
 	private int kills, downs, score;
+
 	
 	public Stats(Handler handler) {
 		this.handler = handler;
 		kills = 0;
 		score = 0;
 		downs = 0;
+		
 	}
 	
+
+	
 	public void gainKill() {
+		handler.getGlobalStats().gainKill();
 		kills++;
 	}
 	
@@ -24,6 +36,7 @@ public class Stats {
 	
 	public void gainDown() {
 		downs++;
+		handler.getGlobalStats().gainDown();
 	}
 
 	public int getKills() {

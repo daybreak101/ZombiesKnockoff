@@ -29,6 +29,7 @@ public class LeaderboardElement extends HudElement {
 	public LeaderboardElement(Handler handler) {
 		super(400, 100, 0, 0, handler);
 		spots = new ArrayList<LeaderboardSpot>();
+		handler.getGlobalStats().writeToFile();
 		readFromFile();
 		// check if top 10 then do...
 		checkIfTop10();
@@ -160,6 +161,8 @@ public class LeaderboardElement extends HudElement {
 		else {
 			newGameTicker++;
 			if(newGameTicker >= newGameCountdown) {
+				handler.getGlobalStats().addGame();
+				handler.getGlobalStats().writeToFile();
 				handler.getGame().gameState = new GameState(handler);
 				State.setState(handler.getGame().gameState);
 			}
@@ -283,7 +286,7 @@ public class LeaderboardElement extends HudElement {
 	int transparency = 0;
 	@Override
 	public void render(Graphics g) {
-		g.setColor(Color.green);
+		g.setColor(handler.getSettings().getHudColor());
 		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 30));
 		if (newScore) {
 			g.drawString("Enter Your name", (int) x, (int) y);

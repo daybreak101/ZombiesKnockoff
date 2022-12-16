@@ -14,10 +14,7 @@ import entities.creatures.playerinfo.Stats;
 import entities.statics.InteractableStaticEntity;
 import entities.statics.traps.IcyWater;
 import graphics.Assets;
-import hud.GameplayElement;
 import hud.LeaderboardElement;
-import hud.PointGainElement;
-import hud.Scoreboard;
 import main.Handler;
 import perks.Perk;
 import states.PauseState;
@@ -218,6 +215,7 @@ public class Player extends Creature {
 			died = true;
 			System.out.println("YOU LOSE");
 			handler.getHud().getObjects().clear();
+			handler.getHud().setInvisible();
 			handler.getHud().getObjects().add(new LeaderboardElement(handler));
 		}
 
@@ -296,6 +294,7 @@ public class Player extends Creature {
 			}
 		}
 		if (handler.getKeyManager().escape) {
+			handler.getHud().setInvisible();
 			State.setState(new PauseState(handler));
 		}
 		if (handler.getKeyManager().capslock) {
@@ -437,8 +436,6 @@ public class Player extends Creature {
 
 	public void gainPoints(int add) {
 		inv.gainPoints(add);
-		stats.gainScore(add);
-		handler.getHud().addObject(new PointGainElement(handler, add));
 	}
 
 	public boolean purchase(int price) {

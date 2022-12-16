@@ -274,15 +274,15 @@ public class Zombie extends Creature {
 
 	public boolean checkForObstacles() {
 		Player player = handler.getPlayer();
-		z2p[0] = new Line2D.Float(x, y, player.getX(), player.getY());
-		z2p[1] = new Line2D.Float(x, y, player.getX(), player.getY() + player.getHeight() / 2);
-		z2p[2] = new Line2D.Float(x, y, player.getX(), player.getY() + player.getHeight());
-		z2p[3] = new Line2D.Float(x, y, player.getX() + player.getWidth() / 2, player.getY());
+		z2p[0] = new Line2D.Float(x, y, player.getX() + 2, player.getY() + 2);
+		z2p[1] = new Line2D.Float(x, y, player.getX() + 2, player.getY() + player.getHeight() / 2);
+		z2p[2] = new Line2D.Float(x, y, player.getX() + 2, player.getY() + player.getHeight() - 2);
+		z2p[3] = new Line2D.Float(x, y, player.getX() + player.getWidth() / 2, player.getY() + 2);
 		z2p[4] = new Line2D.Float(x, y, player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2);
-		z2p[5] = new Line2D.Float(x, y, player.getX() + player.getWidth() / 2, player.getY() + player.getHeight());
-		z2p[6] = new Line2D.Float(x, y, player.getX() + player.getWidth(), player.getY());
-		z2p[7] = new Line2D.Float(x, y, player.getX() + player.getWidth(), player.getY() + player.getHeight() / 2);
-		z2p[8] = new Line2D.Float(x, y, player.getX() + player.getWidth(), player.getY() + player.getHeight());
+		z2p[5] = new Line2D.Float(x, y, player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() - 2);
+		z2p[6] = new Line2D.Float(x, y, player.getX() + player.getWidth() - 2, player.getY() + 2);
+		z2p[7] = new Line2D.Float(x, y, player.getX() + player.getWidth() - 2, player.getY() + player.getHeight() / 2);
+		z2p[8] = new Line2D.Float(x, y, player.getX() + player.getWidth() - 2, player.getY() + player.getHeight() - 2);
 
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
 			for (int i = 0; i < 9; i++) {

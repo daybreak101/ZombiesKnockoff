@@ -100,7 +100,7 @@ public class GameplayElement extends HudElement {
 
 	public void renderHealthAndArmor(Graphics g) {
 		// render health
-		g.setColor(Color.RED);
+		g.setColor(new Color(128, 0, 0));
 		g.fillRect((int) 100, (int) handler.getHeight() - 100, 100, 50);
 
 		g.setColor(hudColor);
@@ -255,7 +255,8 @@ public class GameplayElement extends HudElement {
 		renderPowerups(g);
 		renderRound(g);
 		renderStamina(g);
-		renderZombiesLeft(g);
+		if(handler.getSettings().isZombieCounter())
+			renderZombiesLeft(g);
 
 		Point2D center = new Point2D.Float(500, 500);
 		float radius = 250;

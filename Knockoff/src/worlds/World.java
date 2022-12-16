@@ -1,7 +1,9 @@
 package worlds;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -147,15 +149,19 @@ public class World {
 
 	}
 
-	BufferedImage map;
+	//BufferedImage map;
 	public void render(Graphics g) {
+		double zoomLevel = handler.getSettings().getZoomLevel();
+		Graphics2D g2d = (Graphics2D) g;
+		AffineTransform old = g2d.getTransform();
 		
+		old.scale(zoomLevel, zoomLevel);
+		g2d.setTransform(old);
 		entityManager.render(g);
-		for (int i = 0; i < handler.getWorld().getEntityManager().getInteractables().size(); i++) {
-			handler.getWorld().getEntityManager().getInteractables().get(i).render(g);
-
-		}
-
+		old.scale(1/zoomLevel, 1/zoomLevel);
+		g2d.setTransform(old);
+		/////////////////////////////////////////////////////////////
+		
 	}
 
 	private void loadWorld(String path) {

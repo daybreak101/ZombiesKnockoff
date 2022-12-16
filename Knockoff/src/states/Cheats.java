@@ -20,7 +20,7 @@ public class Cheats {
 		// perks
 		// handler.getPlayer().getInv().addPerk(new Bandolier(handler));
 		//handler.getPlayer().getInv().addPerk(new DeadShot(handler));
-		handler.getPlayer().getInv().addPerk(new DoubleTap(handler));
+		//handler.getPlayer().getInv().addPerk(new DoubleTap(handler));
 		// handler.getPlayer().getInv().addPerk(new Juggernaut(handler));
 		//handler.getPlayer().getInv().addPerk(new Luna(handler));
 		// handler.getPlayer().getInv().addPerk(new MuleKick(handler));
@@ -28,11 +28,11 @@ public class Cheats {
 		// handler.getPlayer().getInv().addPerk(new Revive(handler));
 		//handler.getPlayer().getInv().addPerk(new SleightOfHand(handler));
 		// handler.getPlayer().getInv().addPerk(new StaminUp(handler));
-		handler.getPlayer().getInv().addPerk(new Stronghold(handler));
-		handler.getPlayer().getInv().addPerk(new Vampire(handler));
+		//handler.getPlayer().getInv().addPerk(new Stronghold(handler));
+		//handler.getPlayer().getInv().addPerk(new Vampire(handler));
 
 		// points
-		int points = 10000;
+		int points = 0;
 		handler.getPlayer().gainPoints(points);
 
 		// set round
@@ -42,9 +42,9 @@ public class Cheats {
 		// give gun
 		//Gun gun = new RPG(handler);
 		//Gun gun = new Flamethrower(handler);
-		Gun gun = new IceShotgun(handler);
-		gun.upgradeWeapon();
-		handler.getPlayer().getInv().setGun(gun);
+		//Gun gun = new IceShotgun(handler);
+		//gun.upgradeWeapon();
+		//handler.getPlayer().getInv().setGun(gun);
 
 	}
 }

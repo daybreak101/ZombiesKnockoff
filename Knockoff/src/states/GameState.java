@@ -44,30 +44,22 @@ public class GameState extends State {
 	}
 
 	int transparency = 255;
-	double zoomLevel = 1.0;
+
 	@Override
 	public void render(Graphics g) {
+		//double zoomLevel = handler.getSettings().getZoomLevel();
+		//Graphics2D g2d = (Graphics2D) g;
+		//AffineTransform old = g2d.getTransform();
 		
-		//implementation on how to world without zooming HUD///////
-		if(zoomLevel > 1.5) {
-			zoomLevel = 1.5;
-		}
-		else if(zoomLevel < 0.5) {
-			zoomLevel = 0.5;
-		}
-		
-		Graphics2D g2d = (Graphics2D) g;
-		AffineTransform old = g2d.getTransform();
-		
-		old.scale(zoomLevel, zoomLevel);
-		g2d.setTransform(old);
+		//old.scale(zoomLevel, zoomLevel);
+		//g2d.setTransform(old);
 		/////////////////////////////////////////////////////////////
 		
 		world.render(g);
 		
 		
-		old.scale(1/zoomLevel, 1/zoomLevel);
-		g2d.setTransform(old);
+		//old.scale(1/zoomLevel, 1/zoomLevel);
+		//g2d.setTransform(old);
 		hud.render(g);
 		
 	if(transparency > 0){
@@ -80,6 +72,11 @@ public class GameState extends State {
 			
 		}
 	}
+	
+	public World getWorld() {
+		return world;
+	}
+
 	
 
 }

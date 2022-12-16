@@ -27,14 +27,14 @@ public class GameCamera {
 	}
 	
 	public void centerOnEntity(Entity e) {
-		xOffset = e.getX() - handler.getWidth()/2 + e.getWidth()/2;
-		yOffset = e.getY() - handler.getHeight()/2 + e.getHeight()/2;
+		xOffset = (float) (e.getX() - handler.getWidth()/2/handler.getSettings().getZoomLevel() + e.getWidth()/2  / handler.getSettings().getZoomLevel());
+		yOffset = (float) (e.getY() - handler.getHeight()/2/ handler.getSettings().getZoomLevel() + e.getHeight()/2 / handler.getSettings().getZoomLevel());
 		checkBlankSpace();
 	}
 	
 	public void move(float xAmt, float yAmt) {
-		xOffset += xAmt;
-		yOffset += yAmt;
+		xOffset += xAmt * handler.getSettings().getZoomLevel();
+		yOffset += yAmt * handler.getSettings().getZoomLevel();
 		checkBlankSpace();
 	}
 	

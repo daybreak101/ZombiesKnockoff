@@ -16,6 +16,7 @@ public class Handler {
 	private RoundLogic rounds;
 	private HudManager hud;
 	private Settings settings;
+	private GlobalStats globalStats;
 	
 	public Player getPlayer() {
 		return player;
@@ -28,6 +29,7 @@ public class Handler {
 	public Handler(Game game) {
 		this.game = game;
 		settings = new Settings(this);
+		globalStats = new GlobalStats(this);
 	}
 	
 	public GameCamera getGameCamera() {
@@ -83,9 +85,14 @@ public class Handler {
 	public Settings getSettings() {
 		return settings;
 	}
-	
-	
-	
-	
+
+	public GlobalStats getGlobalStats() {
+		return globalStats;
+	}
+
+	public void setGlobalStats(GlobalStats globalStats) {
+		this.globalStats = globalStats;
+	}
+
 	
 }

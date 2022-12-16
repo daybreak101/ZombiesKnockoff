@@ -1,0 +1,81 @@
+package entities.creatures.playerinfo;
+
+import main.Handler;
+import utils.Utils;
+
+public class Stats {
+
+	private Handler handler;
+	//current game
+	private int kills, downs, score;
+
+	//global stats
+	private long globalKills, globalDowns, totalGames;
+	
+	public Stats(Handler handler) {
+		this.handler = handler;
+		kills = 0;
+		score = 0;
+		downs = 0;
+		
+	}
+	
+	public void readGlobalStats() {
+		String file = Utils.loadFileAsString("/info/globalStats.txt");
+		String[] tokens = file.split("\\s+");
+		int i = 0;
+		int token = 0;
+
+		if (tokens.length == 0) {
+			return;
+		}
+		int zoomLevelToken = Utils.parseInt(tokens[i++]);
+		int hudColorToken = Utils.parseInt(tokens[i++]);
+		int laserColorToken = Utils.parseInt(tokens[i++]);
+		int zombieCounterToken = Utils.parseInt(tokens[i++]);
+	}
+	
+	public void gainKill() {
+		globalKills++;
+		kills++;
+	}
+	
+	public void gainScore(int dScore) {
+		score += dScore;
+	}
+	
+	public void gainDown() {
+		downs++;
+		globalDowns++;
+	}
+	
+	public void addGame() {
+		totalGames++;
+	}
+
+	public int getKills() {
+		return kills;
+	}
+
+	public void setKills(int kills) {
+		this.kills = kills;
+	}
+
+	public int getDowns() {
+		return downs;
+	}
+
+	public void setDowns(int downs) {
+		this.downs = downs;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+
+}

@@ -7,3 +7,6 @@
 1671024181565	Encapsulate field 'kills'
 1671024187267	Encapsulate field 'downs'
 1671024196156	Encapsulate field 'score'
+1671094464804	Encapsulate field 'zombieCounter'
+1671191118488	Encapsulate field 'stats'
+1671191330362	Encapsulate field 'globalStats'

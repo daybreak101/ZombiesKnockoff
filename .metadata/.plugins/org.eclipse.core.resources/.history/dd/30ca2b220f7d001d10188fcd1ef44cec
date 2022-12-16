@@ -1,0 +1,92 @@
+package main;
+
+import java.awt.Color;
+
+import utils.Utils;
+
+public class Settings {
+	
+	private Handler handler;
+	private double zoomLevel;
+	private boolean gore, zombieCounter;
+	private Color laserColor;
+	private Color hudColor;
+	
+	public Settings(Handler handler) {
+		this.handler = handler;
+		//default settings
+		zoomLevel = 1;
+		gore = true;
+		zombieCounter = false;
+		laserColor = Color.red;
+		hudColor = Color.green;
+		useSavedSettings();
+	}
+	
+	public void useSavedSettings() {
+		String file = Utils.loadFileAsString("/info/settings.txt");
+		String[] tokens = file.split("\\s+");
+		int i = 0;
+		int token = 0;
+		zoomLevelToken
+		hudColorToken
+		laserColorToken
+		zombieCounterToken
+		while (i < tokens.length) {
+			token = Utils.parseInt(tokens[i++]);
+			x = Utils.parseInt(tokens[i++]);
+			y = Utils.parseInt(tokens[i++]);
+			switch (token) {
+			
+			}
+		}
+	}
+
+	public Handler getHandler() {
+		return handler;
+	}
+
+	public void setHandler(Handler handler) {
+		this.handler = handler;
+	}
+
+	public double getZoomLevel() {
+		return zoomLevel;
+	}
+
+	public void setZoomLevel(double zoomLevel) {
+		this.zoomLevel = zoomLevel;
+	}
+
+	public boolean isGore() {
+		return gore;
+	}
+
+	public void setGore(boolean gore) {
+		this.gore = gore;
+	}
+
+	public Color getLaserColor() {
+		return laserColor;
+	}
+
+	public void setLaserColor(Color laserColor) {
+		this.laserColor = laserColor;
+	}
+
+	public Color getHudColor() {
+		return hudColor;
+	}
+
+	public void setHudColor(Color hudColor) {
+		this.hudColor = hudColor;
+	}
+
+	public boolean isZombieCounter() {
+		return zombieCounter;
+	}
+
+	public void setZombieCounter(boolean zombieCounter) {
+		this.zombieCounter = zombieCounter;
+	}
+}

@@ -58,6 +58,12 @@ public class UIManager {
 		objects.add(o);
 	}
 	
+	public void addObjects(ArrayList<TextButton> objects) {
+		for(TextButton o: objects) {
+			this.objects.add(o);
+		}
+	}
+	
 	public void removeObject(UIObject o) {
 		objects.remove(o);
 	}

@@ -3,10 +3,9 @@ package states;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import graphics.Assets;
 import main.Handler;
 import ui.ClickListener;
-import ui.UIImageButton;
+import ui.TextButton;
 import ui.UIManager;
 
 public class MenuState extends State{
@@ -18,10 +17,11 @@ public class MenuState extends State{
 		uiManager = new UIManager(handler);
 		handler.getMouseManager().setUIManager(uiManager);
 		
-		uiManager.addObject(new UIImageButton(400,400,128,64, Assets.btn_start, new ClickListener() {
+		uiManager.addObject(new TextButton(handler, 300,400,300,100, "Start Game", 50, new ClickListener() {
 
 			@Override
 			public void onClick() {
+				handler.getGlobalStats().addGame();
 				handler.getMouseManager().setUIManager(null);
 				handler.getGame().gameState = new GameState(handler);
 				State.setState(handler.getGame().gameState);
@@ -39,8 +39,10 @@ public class MenuState extends State{
 	@Override
 	public void render(Graphics g) {
 		// TODO Auto-generated method stub
+		g.setColor(Color.black);
+		g.fillRect(0, 0, handler.getWidth(), handler.getHeight());
 		uiManager.render(g);
-		g.setColor(Color.RED);
+		g.setColor(handler.getSettings().getLaserColor());
 		g.fillRect(handler.getMouseManager().getMouseX(), handler.getMouseManager().getMouseY(), 8, 8);
 		
 	}

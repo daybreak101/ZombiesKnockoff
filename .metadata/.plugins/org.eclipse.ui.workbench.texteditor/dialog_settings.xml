@@ -6,8 +6,15 @@
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
-		<item key="selection" value="justAttacked"/>
+		<item key="selection" value="die"/>
 		<list key="findhistory">
+			<item value="die"/>
+			<item value="checkForObstacles"/>
+			<item value="checkforobstacles"/>
+			<item value="gainpoints"/>
+			<item value="checkfor"/>
+			<item value="getcollision"/>
+			<item value="input"/>
 			<item value="justattacked"/>
 			<item value="health"/>
 			<item value="ring"/>
@@ -16,8 +23,6 @@
 			<item value="breakfree"/>
 			<item value="takedamage"/>
 			<item value="icecounter"/>
-			<item value="takeDamage"/>
-			<item value="&#x09;&#x09;&#x09;&#x09;&#x09;&#x09;&#x09;float moveToX = ((float) (goTo % handler.getWorld().ge{tWidth()) * Tile.TILEWIDTH) - x;"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>
