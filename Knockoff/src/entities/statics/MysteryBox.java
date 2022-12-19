@@ -33,6 +33,7 @@ public class MysteryBox extends InteractableStaticEntity {
 				cantAfford = false;
 				cooldownTimer = 0;
 				gun = getRandomWeapon();
+				handler.getGlobalStats().addBoxSpin();
 				
 				//don't give a weapon player already has
 				while(handler.getPlayer().checkArsenal(gun)) {
@@ -51,6 +52,7 @@ public class MysteryBox extends InteractableStaticEntity {
 			isOpened = false;
 			isOpenedTimer = 0;
 			handler.getPlayer().setGun(gun);
+			handler.getGlobalStats().addBoxPull();
 		}
 		
 	}

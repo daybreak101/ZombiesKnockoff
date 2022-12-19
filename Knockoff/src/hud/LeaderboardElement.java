@@ -105,7 +105,7 @@ public class LeaderboardElement extends HudElement {
 
 	public void writeToFile() {
 		try {
-			FileWriter writer = new FileWriter("res/leaderboard.txt");
+			FileWriter writer = new FileWriter("res/info/leaderboard.txt");
 			BufferedWriter buffer = new BufferedWriter(writer);
 			for (int i = 0; i < spots.size(); i++) {
 				buffer.write(spots.get(i).name);

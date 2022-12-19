@@ -2,6 +2,7 @@ package states;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.WindowEvent;
 
 import main.Handler;
 import ui.ClickListener;
@@ -17,7 +18,7 @@ public class MenuState extends State{
 		uiManager = new UIManager(handler);
 		handler.getMouseManager().setUIManager(uiManager);
 		
-		uiManager.addObject(new TextButton(handler, 300,400,300,100, "Start Game", 50, new ClickListener() {
+		uiManager.addObject(new TextButton(handler, 300,200,300,100, "Start Game", 50, new ClickListener() {
 
 			@Override
 			public void onClick() {
@@ -25,6 +26,33 @@ public class MenuState extends State{
 				handler.getMouseManager().setUIManager(null);
 				handler.getGame().gameState = new GameState(handler);
 				State.setState(handler.getGame().gameState);
+				
+			}}));
+		
+		uiManager.addObject(new TextButton(handler, 300,300,300,100, "Settings", 50, new ClickListener() {
+
+			@Override
+			public void onClick() {
+				handler.getMouseManager().setUIManager(null);
+				State.setState(new SettingsState(handler));
+				
+			}}));
+		
+		uiManager.addObject(new TextButton(handler, 300,400,300,100, "Stats", 50, new ClickListener() {
+
+			@Override
+			public void onClick() {
+				handler.getMouseManager().setUIManager(null);
+				State.setState(new StatsState(handler));
+				
+			}}));
+		
+		
+		uiManager.addObject(new TextButton(handler, 300,500,300,100, "Quit", 50, new ClickListener() {
+
+			@Override
+			public void onClick() {
+				handler.getGame().closeGame();
 				
 			}}));
 		
@@ -46,5 +74,6 @@ public class MenuState extends State{
 		g.fillRect(handler.getMouseManager().getMouseX(), handler.getMouseManager().getMouseY(), 8, 8);
 		
 	}
+	
 
 }

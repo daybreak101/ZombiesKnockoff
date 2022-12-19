@@ -32,7 +32,7 @@ public class Cheats {
 		//handler.getPlayer().getInv().addPerk(new Vampire(handler));
 
 		// points
-		int points = 0;
+		int points = 50000;
 		handler.getPlayer().gainPoints(points);
 
 		// set round

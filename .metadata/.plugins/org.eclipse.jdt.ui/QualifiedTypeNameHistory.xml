@@ -59,4 +59,5 @@
     <fullyQualifiedTypeName name="entities.creatures.Zombie"/>
     <fullyQualifiedTypeName name="java.awt.geom.Line2D.Float"/>
     <fullyQualifiedTypeName name="utils.Utils"/>
+    <fullyQualifiedTypeName name="java.awt.event.WindowEvent"/>
 </qualifiedTypeNameHistroy>

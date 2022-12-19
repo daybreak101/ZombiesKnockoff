@@ -45,9 +45,11 @@ public class PauseState extends State {
 
 			@Override
 			public void onClick() {
+				handler.getGlobalStats().calculateNewAverageRound(handler.getRoundLogic().getCurrentRound());
 				handler.getGlobalStats().writeToFile();
 				handler.getMouseManager().setUIManager(null);
 				System.gc();
+				handler.setWorld(null);
 				State.setState(new MenuState(handler));
 
 			}

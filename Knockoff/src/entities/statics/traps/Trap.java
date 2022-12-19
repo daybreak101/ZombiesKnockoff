@@ -25,7 +25,7 @@ public class Trap extends Entity {
 	public void fulfillInteraction() {
 		activated = true;
 		cooldownTimer = 0;
-		
+		handler.getGlobalStats().addTrapPull();
 	}
 	
 	public void tick() {

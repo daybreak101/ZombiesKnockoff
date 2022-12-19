@@ -9,12 +9,14 @@ import perks.Bandolier;
 import perks.DeadShot;
 import perks.DoubleTap;
 import perks.Juggernaut;
+import perks.Luna;
 import perks.MuleKick;
 import perks.Perk;
 import perks.PhD;
 import perks.Revive;
 import perks.SleightOfHand;
 import perks.StaminUp;
+import perks.Stronghold;
 import perks.Vampire;
 
 public class RandomPerk extends InteractableStaticEntity{
@@ -34,7 +36,7 @@ public class RandomPerk extends InteractableStaticEntity{
 
 	@Override
 	public void fulfillInteraction() {
-		//spin for weapon
+		//spin for perk
 		
 		if(isSpun == false && cooldownTimer >= cooldown) {
 			if(isSpun == false && !handler.getWorld().getEntityManager().getPlayer().checkPerkEmptySpot()) {
@@ -45,8 +47,10 @@ public class RandomPerk extends InteractableStaticEntity{
 				cantAfford = false;
 				cooldownTimer = 0;
 				perk = getRandomPerk();
+				handler.getGlobalStats().addPerkSpin();
 				
-				//don't give a weapon player already has
+				
+				//don't give a perk player already has
 				while(handler.getWorld().getEntityManager().getPlayer().checkPerks(perk)) {
 					perk = getRandomPerk();
 				}
@@ -56,11 +60,12 @@ public class RandomPerk extends InteractableStaticEntity{
 				cooldownTimer = 0;
 			}		
 		}
-		//grab weapon
+		//grab perk
 		else if(isSpun == true && cooldownTimer >= cooldown && isSpunTimer < isSpunTime) {
 			cooldownTimer = 0;
 			isSpun = false;
 			isSpunTimer = 0;
+			handler.getGlobalStats().addPerk();
 			handler.getWorld().getEntityManager().getPlayer().addPerk(perk);
 		}
 		
@@ -68,7 +73,7 @@ public class RandomPerk extends InteractableStaticEntity{
 	
 	public Perk getRandomPerk() {
 		Random rand = new Random();
-		int rng = rand.nextInt(10);
+		int rng = rand.nextInt(12);
 		
 		switch(rng) {
 		case 0:
@@ -91,6 +96,10 @@ public class RandomPerk extends InteractableStaticEntity{
 			return new Bandolier(handler);
 		case 9:
 			return new Revive(handler);
+		case 10: 
+			return new Luna(handler);
+		case 11: 
+			return new Stronghold(handler);
 		}
 		return new DeadShot(handler);
 	}

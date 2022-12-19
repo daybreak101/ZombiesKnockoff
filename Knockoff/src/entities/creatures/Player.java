@@ -212,6 +212,7 @@ public class Player extends Creature {
 	public void die() {
 		if (!died) {
 			stats.gainDown();
+			handler.getGlobalStats().calculateNewAverageRound(handler.getRoundLogic().getCurrentRound());
 			died = true;
 			System.out.println("YOU LOSE");
 			handler.getHud().getObjects().clear();

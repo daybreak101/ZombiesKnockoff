@@ -87,6 +87,7 @@ public class PackAPunch extends InteractableStaticEntity {
 					handler.getPlayer().gainPoints(5000);
 				} else {
 					handler.getPlayer().removeGunForUpgrade();
+					handler.getGlobalStats().addGunUpgrade();
 					gunPacked.upgradeWeapon();
 				}
 			}

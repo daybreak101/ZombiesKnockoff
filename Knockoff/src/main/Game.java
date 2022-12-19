@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -196,4 +197,9 @@ public class Game implements Runnable {
 			return;
 		thread.join();
 	}
+	
+	public void closeGame() {
+		System.exit(0);
+	}
+
 }
