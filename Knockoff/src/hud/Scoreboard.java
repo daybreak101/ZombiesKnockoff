@@ -13,7 +13,7 @@ public class Scoreboard extends HudElement {
 	private Stats stats;
 
 	public Scoreboard(Handler handler) {
-		super(300, 200, 0, 0, handler);
+		super(200, 200, 0, 0, handler);
 		
 	}
 
@@ -30,12 +30,14 @@ public class Scoreboard extends HudElement {
 		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 30));
 		g.drawString("Score", (int) x, (int) y);
 		g.drawString("Kills", (int) x + 150, (int) y);
-		g.drawString("Downs", (int) x + 250, (int) y);
+		g.drawString("Headshots", (int) x + 300, (int) y);
+		g.drawString("Downs", (int) x + 450, (int) y);
 
 		
 		g.drawString(String.valueOf(stats.getScore()), (int) x, (int) y + 50);
 		g.drawString(String.valueOf(stats.getKills()), (int) x + 150, (int) y + 50);
-		g.drawString(String.valueOf(stats.getDowns()), (int) x + 250, (int) y + 50);
+		g.drawString(String.valueOf(stats.getHeadshots()), (int) x + 300, (int) y + 50);
+		g.drawString(String.valueOf(stats.getDowns()), (int) x + 450, (int) y + 50);
 
 	}
 	

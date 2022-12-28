@@ -4,9 +4,11 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Random;
 
+import entities.statics.Barrier;
 import main.Handler;
 
 public abstract class Entity {
+	protected boolean isZombie = false;
 	protected Handler handler;
 	protected float x, y;
 	protected int width, height;
@@ -28,12 +30,12 @@ public abstract class Entity {
 	
 	public void takeDamage(int amount) {
 		
-			
+		boolean crit = false;
 		if(handler.getRoundLogic().getPowerups().isInstakillActive()) {
 			health = 0;
 		}
 		else {
-			boolean crit = isCritical();
+			crit = isCritical();
 			if(crit && handler.getPlayer().getInv().isDeadshot()) {
 				health -= (amount * 3);
 				System.out.println("critical");
@@ -49,7 +51,14 @@ public abstract class Entity {
 		}
 		
 		if(health <= 0 && active == true) {
-			handler.getPlayer().gainPoints(70);
+			if(crit) {
+				handler.getPlayer().gainPoints(100);
+				handler.getPlayer().getStats().addHeadshot();
+			}
+			else {
+				handler.getPlayer().gainPoints(70);
+			}
+			
 			active = false;
 			die();
 		}
@@ -78,14 +87,17 @@ public abstract class Entity {
 		for(Entity e: handler.getWorld().getEntityManager().getEntities()) {
 			if(e.equals(this))
 				continue;
-			if(e.getCollisionBounds(0f, 0f).intersects(getCollisionBounds(xOffset, yOffset)))
+			if(handler.getWorld().getEntityManager().getBarriers().contains(e)) {
+				continue;
+			}
+			else if(e.getCollisionBounds(0f, 0f).intersects(getCollisionBounds(xOffset, yOffset)))
 				return true;
 		}
 		return false;
 	}
 	
 	public Rectangle getCollisionBounds(float xOffset, float yOffset) {
-		return new Rectangle((int) (x + bounds.x + xOffset), (int) (y + bounds.y + yOffset), bounds.width, bounds.height); 
+		return new Rectangle((int) (x + bounds.x + xOffset), (int) (y + bounds.y + yOffset), (int) (bounds.width), (int) (bounds.height)); 
 	}
 	
 	
@@ -135,6 +147,10 @@ public abstract class Entity {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	public boolean isZombie() {
+		return isZombie;
 	}
 
 	public void tick() {}

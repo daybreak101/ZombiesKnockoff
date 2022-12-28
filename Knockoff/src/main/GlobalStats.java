@@ -11,7 +11,7 @@ public class GlobalStats {
 	private Handler handler;
 
 	// global stats
-	private long globalKills, globalDowns, totalGames, perksAte, perkSpins,
+	private long globalKills, globalHeadshots, globalDowns, totalGames, perksAte, perkSpins,
 				boxSpins, boxPulls, gunsUpgraded, trapPulls;
 	private double averageRound;
 
@@ -27,6 +27,7 @@ public class GlobalStats {
 
 		if (tokens.length == 0) {
 			globalKills = 0;
+			globalHeadshots = 0;
 			globalDowns = 0;
 			totalGames = 0;
 			perksAte = 0;
@@ -39,15 +40,16 @@ public class GlobalStats {
 			return;
 		}
 		globalKills = Utils.parseInt(tokens[0]);
-		globalDowns = Utils.parseInt(tokens[1]);
-		totalGames = Utils.parseInt(tokens[2]);
-		perksAte = Utils.parseInt(tokens[3]);
-		perkSpins = Utils.parseInt(tokens[4]);
-		boxPulls = Utils.parseInt(tokens[5]);
-		boxSpins = Utils.parseInt(tokens[6]);
-		gunsUpgraded = Utils.parseInt(tokens[7]);
-		trapPulls = Utils.parseInt(tokens[8]);
-		averageRound = Utils.parseDouble(tokens[9]);
+		globalHeadshots = Utils.parseInt(tokens[1]);
+		globalDowns = Utils.parseInt(tokens[2]);
+		totalGames = Utils.parseInt(tokens[3]);
+		perksAte = Utils.parseInt(tokens[4]);
+		perkSpins = Utils.parseInt(tokens[5]);
+		boxPulls = Utils.parseInt(tokens[6]);
+		boxSpins = Utils.parseInt(tokens[7]);
+		gunsUpgraded = Utils.parseInt(tokens[8]);
+		trapPulls = Utils.parseInt(tokens[9]);
+		averageRound = Utils.parseDouble(tokens[10]);
 	}
 
 	// make new file global stats
@@ -57,6 +59,8 @@ public class GlobalStats {
 			BufferedWriter buffer = new BufferedWriter(writer);
 
 			buffer.write(Long.toString(globalKills));
+			buffer.newLine();
+			buffer.write(Long.toString(globalHeadshots));
 			buffer.newLine();
 			buffer.write(Long.toString(globalDowns));
 			buffer.newLine();
@@ -160,6 +164,14 @@ public class GlobalStats {
 
 	public void calculateNewAverageRound(int newRound) {
 		averageRound = ((averageRound * (totalGames - 1)) + newRound)/(totalGames);
+	}
+
+	public long getGlobalHeadshots() {
+		return globalHeadshots;
+	}
+
+	public void addHeadshot() {
+		this.globalHeadshots++;
 	}
 	
 }

@@ -49,7 +49,7 @@ public class RoundLogic {
 			noMansLandCycle();
 		} else {
 			getReadySpawners();
-			if (zombiesLeft == 0 && handler.getWorld().getEntityManager().getZombies().getObjects().size() == 0) {
+			if (zombiesLeft == 0 && handler.getWorld().getEntityManager().getZombies().size() == 0) {
 				counter++;
 				if (counter >= roundCooldown) {
 					counter = 0;
@@ -94,7 +94,7 @@ public class RoundLogic {
 			}
 
 			// change variables for existing zombies
-			for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+			for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 				if (e.getHealth() < oldHealth) {
 					e.setHealth(e.getHealth() + 50);
 				} else {
@@ -118,7 +118,7 @@ public class RoundLogic {
 
 	public void spawner() {
 		spawnTicker++;
-		if (handler.getWorld().getEntityManager().getZombies().getObjects().size() < 24 && zombiesLeft != 0
+		if (handler.getWorld().getEntityManager().getZombies().size() < 24 && zombiesLeft != 0
 				&& spawnTicker >= spawnRate) {
 
 			Random rand = new Random();
@@ -191,23 +191,25 @@ public class RoundLogic {
 
 	public void calculateSpawnRate() {
 		if (currentRound < 3)
-			spawnRate = 52;
+			spawnRate = 90;
+		else if (currentRound < 6)
+			spawnRate = 80;
 		else if (currentRound < 8)
-			spawnRate = 45;
+			spawnRate = 75;
 		else if (currentRound < 12)
-			spawnRate = 36;
+			spawnRate = 65;
 		else if (currentRound < 16)
-			spawnRate = 29;
+			spawnRate = 55;
 		else if (currentRound < 24)
-			spawnRate = 22;
+			spawnRate = 45;
 		else if (currentRound < 31)
-			spawnRate = 18;
+			spawnRate = 40;
 		else if (currentRound < 37)
-			spawnRate = 13;
+			spawnRate = 35;
 		else if (currentRound < 45)
-			spawnRate = 8;
+			spawnRate = 30;
 		else if (currentRound >= 45) {
-			spawnRate = 5;
+			spawnRate = 20;
 		}
 	}
 
@@ -227,33 +229,34 @@ public class RoundLogic {
 
 	public void calculatedSpeed() {
 		if (currentRound < 3)
-			dSpeed = 0.2f;
+			dSpeed = 0;
 		else if (currentRound < 8)
-			dSpeed = 0.4f;
+			dSpeed = 0.2f;
 		else if (currentRound < 12)
-			dSpeed = 0.6f;
+			dSpeed = 0.5f;
 		else if (currentRound < 16)
-			dSpeed = 0.9f;
+			dSpeed = 0.7f;
 		else if (currentRound < 24)
-			dSpeed = 1.2f;
+			dSpeed = 0.8f;
 		else if (currentRound < 31)
-			dSpeed = 1.5f;
+			dSpeed = 0.9f;
 		else if (currentRound < 37)
-			dSpeed = 1.8f;
+			dSpeed = 1.0f;
 		else if (currentRound < 45)
-			dSpeed = 2.1f;
+			dSpeed = 1.1f;
 		else if (currentRound >= 45) {
-			dSpeed = 2.4f;
+			dSpeed = 1.2f;
 		}
 	}
 
 	public void calculateHealth() {
 		int health = 50;
 		for (int i = 1; i <= currentRound; i++) {
-			if (i == 30) {
-				zombieHealth = health;
-				return;
-			}
+			//health cap
+			//if (i == 30) {
+			//	zombieHealth = health;
+			//	return;
+			//}
 			if (i >= 10)
 				health = health + (int) (health * 0.10);
 			else
@@ -279,7 +282,7 @@ public class RoundLogic {
 	}
 
 	public int getZombiesLeft() {
-		return handler.getWorld().getEntityManager().getZombies().getObjects().size() + zombiesLeft;
+		return handler.getWorld().getEntityManager().getZombies().size() + zombiesLeft;
 	}
 
 	public int getZpr() {

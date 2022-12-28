@@ -7,10 +7,12 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 
+import entities.Entity;
 import entities.areas.Areas;
 import entities.bullets.Grenade;
 import entities.creatures.playerinfo.Inventory;
 import entities.creatures.playerinfo.Stats;
+import entities.statics.Barrier;
 import entities.statics.InteractableStaticEntity;
 import entities.statics.traps.IcyWater;
 import graphics.Assets;
@@ -20,6 +22,7 @@ import perks.Perk;
 import states.PauseState;
 import states.State;
 import utils.Timer;
+import utils.Utils;
 import weapons.Gun;
 
 public class Player extends Creature {
@@ -58,10 +61,12 @@ public class Player extends Creature {
 		staminaTicker = 0;
 		staminaCooldown = 180;
 
-		speed = 3.5f;
+		speed = 4.0f;
 		defaultSpeed = speed;
 		health = 100;
 	}
+	
+	Timer tookDamageTimer = new Timer(40);
 
 	@Override
 	public void tick() {
@@ -73,7 +78,11 @@ public class Player extends Creature {
 		} else {
 			checkIfInIcyWater();
 			freezing();
-
+			tookDamageTimer.tick();
+			if(tookDamageTimer.isReady()) {
+				justTookDamage = false;
+				tookDamageTimer.resetTimer();
+			}
 			if (isFrozen)
 				getInput();
 			breakCooldown.tick();
@@ -185,8 +194,9 @@ public class Player extends Creature {
 	}
 
 	public Rectangle getHitbox() {
-		return new Rectangle((int) (x + bounds.x - 10), (int) (y + bounds.y - 10), bounds.width + 20,
-				bounds.height + 20);
+		return new Rectangle((int) (x + bounds.x + 5), (int) (y + bounds.y + 5), 
+				bounds.width - 10,
+				bounds.height - 10);
 
 	}
 
@@ -269,11 +279,11 @@ public class Player extends Creature {
 				xMove = speed * isSprinting / slowdown;
 				moved = true;
 			}
-			if (handler.getKeyManager().reload)
+			if (handler.getKeyManager().reload && inv.getGun() != null)
 				inv.getGun().reload();
 			if (handler.getKeyManager().switchWeapon2)
 				inv.switchWeapon();
-			if (handler.getMouseManager().isLeftPressed()) {
+			if (handler.getMouseManager().isLeftPressed() && inv.getGun() != null) {
 				inv.getGun().shoot();
 			}
 
@@ -311,13 +321,29 @@ public class Player extends Creature {
 		}
 
 	}
+	
+	public boolean checkEntityCollisions(float xOffset, float yOffset) {
+		for(Entity e: handler.getWorld().getEntityManager().getEntities()) {
+			if(e.equals(this))
+				continue;
+			
+			if(e.getCollisionBounds(0f, 0f).intersects(getCollisionBounds(xOffset, yOffset)))
+				return true;
+		}
+		for(Barrier e: handler.getWorld().getEntityManager().getBarriers()) {
+			if(e.getPlayerBarrier().intersects(getCollisionBounds(xOffset, yOffset))) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public void sprint() {
 		if (currentStamina > 0) {
 			currentStamina--;
 			staminaTicker = 0;
 			if (inv.isStaminup())
-				isSprinting = 1.6f;
+				isSprinting = 1.8f;
 			else
 				isSprinting = 1.5f;
 		}
@@ -332,9 +358,25 @@ public class Player extends Creature {
 
 	public void interact() {
 		Ellipse2D.Float radius = new Ellipse2D.Float(x - 100, y - 100, 200, 200);
+		
+		InteractableStaticEntity closestInteract = null;
+		float closestDist = 2000000;
+		float eDist;
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (radius.intersects(e.getTriggerRange())) {
-				e.fulfillInteraction();
+			eDist = Utils.getEuclideanDistance(x, y, e.getX(), e.getY());
+			if (closestInteract == null) {
+				closestInteract = e;
+				closestDist = eDist;
+			}
+			if (eDist < closestDist) {
+				closestInteract = e;
+				closestDist = eDist;
+			}
+		}
+		
+		if(closestInteract != null) {
+			if (radius.intersects(closestInteract.getTriggerRange())) {
+				closestInteract.fulfillInteraction();
 			}
 		}
 	}
@@ -563,5 +605,14 @@ public class Player extends Creature {
 	public Stats getStats() {
 		return stats;
 	}
+	
+	public void addToMoveX(int dx) {
+		xMove += dx;
+	}
+	
+	public boolean getJustTookDamage() {
+		return justTookDamage;
+	}
+	
 
 }

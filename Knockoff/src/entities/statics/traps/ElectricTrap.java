@@ -45,7 +45,7 @@ public class ElectricTrap extends Trap {
 		if(handler.getPlayer().getHitbox().intersects(cb)) {
 			handler.getPlayer().takeDamage(5);
 		}
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getHitBox(0, 0).intersects(cb)) {
 				e.dieByTrap();
 			//	handler.getWorld().getEntityManager().getEntities().remove(this);

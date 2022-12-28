@@ -40,11 +40,11 @@ public class Nuke extends PowerUps{
 
 	@Override
 	public void fulfillInteraction() {
-		for(Zombie e: handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for(Zombie e: handler.getWorld().getEntityManager().getZombies()) {
 			e.die();
 			handler.getWorld().getEntityManager().getEntities().remove(e);
 		}
-		handler.getWorld().getEntityManager().getZombies().getObjects().clear();
+		handler.getWorld().getEntityManager().getZombies().clear();
 		handler.getWorld().getEntityManager().getPlayer().gainPoints(400);
 	}
 

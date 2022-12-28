@@ -30,7 +30,7 @@ public class IcePellet extends Bullet{
 	public boolean checkForImpact() {
 		cb = new Rectangle((int) (x + bounds.x - 1), (int) (y + bounds.y - 1), bounds.width + 1, bounds.height + 1);
 
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getHitBox(0, 0).intersects(cb)) {
 					//e.takeDamage((int) (gunFiredFrom.getDamage()));
 				if(!e.isFrozen()) {

@@ -8,7 +8,7 @@ import sounds.Sounds;
 public class P90 extends Gun {
 
 	public P90(Handler handler) {
-		super(handler, 255, 3, 70, 50, 350, 0.2f, 100);
+		super(handler, 150, 3, 70, 50, 350, 0.2f, 100);
 		this.name = "P90";
 		originalName = name;
 		upgradedName = "Peashooter 180";

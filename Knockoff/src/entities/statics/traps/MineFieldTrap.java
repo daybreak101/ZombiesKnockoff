@@ -48,7 +48,7 @@ public class MineFieldTrap extends Trap {
 		
 		explosionRadius = new Ellipse2D.Float(x + dx - 100, y + dy - 100, 200, 200);
 		handler.getWorld().getEntityManager().addBlood(new Explosion(handler, x + dx - 100, y + dy - 100, 200, 200, Color.orange));
-		for(Zombie f: handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for(Zombie f: handler.getWorld().getEntityManager().getZombies()) {
 			int damage = 10000;
 			if(explosionRadius.intersects(f.getHitBox(0,0))) {
 				f.takeDamage(damage);

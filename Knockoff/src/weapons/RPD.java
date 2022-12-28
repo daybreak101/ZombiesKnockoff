@@ -8,7 +8,7 @@ import sounds.Sounds;
 public class RPD extends Gun{
 
 	public RPD(Handler handler) {
-		super(handler, 390, 7, 300, 100, 400, 1.0f, 100);
+		super(handler, 300, 7, 300, 100, 400, 1.0f, 100);
 		this.name = "RPD";
 		originalName = name;
 		upgradedName = "Death by Reload";

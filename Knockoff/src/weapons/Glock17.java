@@ -13,7 +13,7 @@ public class Glock17 extends Gun{
 	//File file = new File("res/shootBeta.wav");
 	
 	public Glock17(Handler handler) {
-		super(handler, 140, 20, 100, 17, 170, 0.1f, 100);
+		super(handler, 25, 20, 100, 17, 170, 0.1f, 100);
 		this.name = "Glock17";
 		originalName = name;
 		upgradedName = "This isn't COD bro";

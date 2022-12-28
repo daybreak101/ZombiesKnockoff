@@ -29,7 +29,7 @@ public class Rocket extends Bullet{
 			damageMultiplier += handler.getPlayer().getStrongholdDamageMultiplier();
 		}
 		
-		for(Zombie f: handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for(Zombie f: handler.getWorld().getEntityManager().getZombies()) {
 			if(explosionRadius.intersects(f.getCollisionBounds(0, 0).getX(), f.getCollisionBounds(0, 0).getY(),
 					f.getCollisionBounds(0, 0).getWidth(), f.getCollisionBounds(0, 0).getHeight())) {
 				f.takeDamage((int) (gunFiredFrom.getDamage() * damageMultiplier));
@@ -49,7 +49,7 @@ public class Rocket extends Bullet{
 		cb = new Rectangle((int)(x + bounds.x - 1), (int)(y + bounds.y - 1), bounds.width + 1, bounds.height + 1);
 		
 		
-		for(Zombie e: handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for(Zombie e: handler.getWorld().getEntityManager().getZombies()) {
 			if(e.getHitBox(0, 0).intersects(cb)) {
 				findEntitiesInRadius();			
 				handler.getWorld().getEntityManager().getEntities().remove(this);

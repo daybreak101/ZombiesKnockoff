@@ -1,14 +1,20 @@
 package utils;
 
+import java.awt.geom.Ellipse2D;
+
+import entities.creatures.Zombie;
+
 public class AdjacencyNode {
 	public int vertex;
 	public float weight;
 	public AdjacencyNode next;
 	
 	public AdjacencyNode(int vertex, float weight) {
+	
 		this.vertex = vertex;
 		this.weight = weight;
 		this.next = null;
+
 	}
 
 	public int getVertex() {
@@ -34,6 +40,5 @@ public class AdjacencyNode {
 	public void setNext(AdjacencyNode next) {
 		this.next = next;
 	}
-	
-	
+
 }

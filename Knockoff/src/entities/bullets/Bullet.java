@@ -3,6 +3,7 @@ package entities.bullets;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 
 import entities.Entity;
 import entities.creatures.Zombie;
@@ -19,6 +20,7 @@ public class Bullet extends Entity {
 	protected float xMove, yMove, angle;
 	protected int range, rangeCounter;
 	protected boolean fromTrap;
+	ArrayList<Zombie> zombiesHit;
 
 	//normal bullet
 	public Bullet(Handler handler, float x, float y, int range) {
@@ -35,6 +37,7 @@ public class Bullet extends Entity {
 		angle = (float) Math.atan2(-mouseY, -mouseX);
 		xMove = (float) (speed * Math.cos(angle));
 		yMove = (float) (speed * Math.sin(angle));
+		zombiesHit = new ArrayList<Zombie>();
 	}
 	
 	//turret bullet
@@ -52,6 +55,7 @@ public class Bullet extends Entity {
 		angle = (float) Math.atan2(-mouseY, -mouseX);
 		xMove = (float) (speed * Math.cos(angle));
 		yMove = (float) (speed * Math.sin(angle));
+		zombiesHit = new ArrayList<Zombie>();
 	}
 	
 	//idk
@@ -69,6 +73,7 @@ public class Bullet extends Entity {
 		angle = (float) Math.atan2(-mouseY, -mouseX);
 		xMove = (float) (speed * Math.cos(angle + radianOffset));
 		yMove = (float) (speed * Math.sin(angle + radianOffset));
+		zombiesHit = new ArrayList<Zombie>();
 	}
 
 	public float getAngle() {
@@ -122,20 +127,26 @@ public class Bullet extends Entity {
 			damageMultiplier += handler.getPlayer().getStrongholdDamageMultiplier();
 		}
 		
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
-			if (e.getHitBox(0, 0).intersects(cb)) {
+		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
+			if (e.getHitBox(0, 0).intersects(cb) && !zombiesHit.contains(e)) {
 				if(fromTrap)
 					e.damageByTrap(gunFiredFrom.getDamage());
 				else {
-					e.takeDamage((int) (gunFiredFrom.getDamage() * damageMultiplier));
-					System.out.println("Damage: " + (int) (gunFiredFrom.getDamage() * damageMultiplier));
+					e.takeDamage((int) (gunFiredFrom.getDamage()/(zombiesHit.size()+1) * damageMultiplier));
+					zombiesHit.add(e);
 				}
-				handler.getWorld().getEntityManager().getEntities().remove(this);
-				return true;
+				
+				if(zombiesHit.size() >= 4) {
+					handler.getWorld().getEntityManager().getEntities().remove(this);
+					return true;
+				}
+				
 			}
 		}
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (e.getCollisionBounds(0, 0).intersects(cb)) {
+			
+			
+			if (!handler.getWorld().getEntityManager().getBarriers().contains(e) && e.getCollisionBounds(0, 0).intersects(cb)) {
 				handler.getWorld().getEntityManager().getEntities().remove(this);
 				return true;
 			}

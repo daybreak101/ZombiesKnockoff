@@ -1,15 +1,20 @@
 package worlds;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import entities.EntityManager;
 import entities.creatures.Player;
 import entities.statics.AmmoRefill;
+import entities.statics.Barrier;
 import entities.statics.InteractableStaticEntity;
 import entities.statics.MysteryBox;
 import entities.statics.PackAPunch;
@@ -22,8 +27,8 @@ import entities.statics.traps.MineFieldTrap;
 import entities.statics.traps.Turret;
 import main.Handler;
 import maps.FactoryMap;
-import perks.Luna;
 import utils.Graph;
+import utils.Node;
 import utils.Utils;
 import zombieLogic.RoundLogic;
 import zombieLogic.Spawner;
@@ -40,34 +45,81 @@ public class World {
 	private ArrayList<Spawner> spawners;
 
 	private Graph graph;
+	private ArrayList<Node> nodes;
 	private int[][] nextStep; // [src][dest]
 	// int i = 0;
 	int ticker = 0, tickerLimit = 600;
 
-	public World(Handler handler, String path, String entityPath) {
+	public World(Handler handler, String path, String entityPath, String nodesPath, String edgesPath) {
 		this.handler = handler;
-
+		nodes = new ArrayList<Node>();
 		entityManager = new EntityManager(handler, new Player(handler, 100, 100));
 
 		spawners = new ArrayList<Spawner>();
 
-		
-
 		rounds = new RoundLogic(handler, spawners);
 		handler.setRoundLogic(rounds);
-		//rounds.setCurrentRound(-2);
 
 		loadWorld(path);
 		handler.setWorld(this);
 		createStaticEntities(entityPath);
-		nextStep = new int[width * height][width * height];
-		for (int i = 0; i < width * height; i++) {
-			buildGraph(i);
+		createNodes(nodesPath);
 
+		for (Node n : nodes) {
+			graph = new Graph(nodes.size());
+			createEdges(edgesPath);
+			buildGraph(n.getVertex());
 		}
+		writeToFile();
+
+//		nextStep = new int[width * height][width * height];
+//		for (int i = 0; i < width * height; i++) {
+//			buildGraph(i);
+//
+//		}
 
 		entityManager.getPlayer().setX(spawnX);
 		entityManager.getPlayer().setY(spawnY);
+	}
+	
+	public void createEdges(String edgesPath) {
+		// read file
+		String file = Utils.loadFileAsString(edgesPath);
+		String[] tokens = file.split("\\s+");
+
+		// get number of nodes
+		int i = 0;
+		
+		// process edges
+		while (i < tokens.length) {
+			int n1= Utils.parseInt(tokens[i++]);
+			int n2= Utils.parseInt(tokens[i++]);
+			Node m = nodes.get(n1);
+			Node n = nodes.get(n2);
+			float distance = Utils.getEuclideanDistance(m.getX(), m.getY(), n.getX(), n.getY());
+			if (!checkForStaticEntities(m.getX(), m.getY(), n.getX(), n.getY())) {
+				graph.createEdge(m.getVertex(), n.getVertex(), distance);
+				graph.createEdge(n.getVertex(), m.getVertex(), distance);
+			}
+		}
+	}
+
+	public void createNodes(String nodesPath) {
+		// read file
+		String file = Utils.loadFileAsString(nodesPath);
+		String[] tokens = file.split("\\s+");
+
+		// get number of nodes
+		int i = 0;
+
+		// process nodes
+		int vertex, x, y;
+		while(i < tokens.length) {
+			vertex = Utils.parseInt(tokens[i++]);
+			x = Utils.parseInt(tokens[i++]);
+			y = Utils.parseInt(tokens[i++]);
+			nodes.add(new Node(vertex, x, y));
+		}
 	}
 
 	public void createStaticEntities(String entityPath) {
@@ -76,6 +128,7 @@ public class World {
 		int i = 0;
 		int token = 0;
 		int x, y;
+		int vertex = 0;
 		while (i < tokens.length) {
 			token = Utils.parseInt(tokens[i++]);
 			x = Utils.parseInt(tokens[i++]);
@@ -93,7 +146,7 @@ public class World {
 			case 3:
 				entityManager.addInteractable(new PackAPunch(handler, x, y));
 				break;
-			case 4: 
+			case 4:
 				spawners.add(new Spawner(handler, x, y));
 				break;
 			case 5:
@@ -127,11 +180,25 @@ public class World {
 			case 11:
 				entityManager.addArea(new IcyWater(handler, x, y));
 				break;
+			case 12:
+				whatWall = Utils.parseInt(tokens[i++]);
+				entityManager.addBarrier(new Barrier(handler, x, y, whatWall));
+				break;
 			default:
 				break;
 
 			}
 		}
+
+//		for (int j = 0; j < height * 2; j++) {
+//			for (int k = 0; k < width * 2; k++) {
+//				if (!checkWithinStaticEntities(k * 50, j * 50)) {
+//					nodes.add(new Node(vertex, k * 50, j * 50));
+//					vertex++;
+//				}
+//			}
+//		}
+
 	}
 
 	public Graph getGraph() {
@@ -149,19 +216,37 @@ public class World {
 
 	}
 
-	//BufferedImage map;
+	// BufferedImage map;
 	public void render(Graphics g) {
 		double zoomLevel = handler.getSettings().getZoomLevel();
 		Graphics2D g2d = (Graphics2D) g;
 		AffineTransform old = g2d.getTransform();
-		
+
 		old.scale(zoomLevel, zoomLevel);
 		g2d.setTransform(old);
 		entityManager.render(g);
-		old.scale(1/zoomLevel, 1/zoomLevel);
+
+		g.setColor(Color.red);
+		for (Node n : nodes) {
+			g.fillOval((int) (n.getX() - handler.getGameCamera().getxOffset()),
+					(int) (n.getY() - handler.getGameCamera().getyOffset()), 5, 5);
+			g.drawString(Integer.toString(n.getVertex()), (int) (n.getX() - handler.getGameCamera().getxOffset()),
+					(int) (n.getY() - handler.getGameCamera().getyOffset()));
+			g.drawString(Integer.toString(n.getX()) + ", " + Integer.toString(n.getY()),
+					(int) (n.getX() - handler.getGameCamera().getxOffset()),
+					(int) (n.getY() + 10 - handler.getGameCamera().getyOffset()));
+			for(Node m : nodes) {
+				Node nextStep = n.getNextNode(m.getVertex());
+				if(nextStep != null)
+					g.drawLine((int) (n.getX()- handler.getGameCamera().getxOffset()), (int) (n.getY()- handler.getGameCamera().getyOffset()), 
+							(int) (nextStep.getX()- handler.getGameCamera().getxOffset()), (int) (nextStep.getY()- handler.getGameCamera().getyOffset()));
+			}
+		}
+
+		old.scale(1 / zoomLevel, 1 / zoomLevel);
 		g2d.setTransform(old);
 		/////////////////////////////////////////////////////////////
-		
+
 	}
 
 	private void loadWorld(String path) {
@@ -175,124 +260,31 @@ public class World {
 	}
 
 	private void buildGraph(int src) {
-//		graph = new Graph(width * height);
-//		Tile t;
-//		boolean topLeft = true, top = true, topRight = true, right = true, bottomRight = true, bottom = true,
-//				bottomLeft = true, left = true;
-//
-//		// add edges
-//		for (int j = 0; j < height; j++) {
-//			for (int i = 0; i < width; i++) {
-//				// System.out.println(i + ", " + j);
-//				t = getTile(i, j);
-//				if (!t.isSolid() && !checkForStaticEntities(i, j)) {
-//					// check if the tile is on edges
-//					if (j == 0) {
-//						topLeft = false;
-//						top = false;
-//						topRight = false;
-//					}
-//					if (j == height - 1) {
-//						bottomLeft = false;
-//						bottom = false;
-//						bottomRight = false;
-//					}
-//					if (i == 0) {
-//						topLeft = false;
-//						left = false;
-//						bottomLeft = false;
-//					}
-//					if (i == width - 1) {
-//						topRight = false;
-//						right = false;
-//						bottomRight = false;
-//					}
-//
-//					float hypotenuse = (float) Math.sqrt(2);
-//					int pos = i + j * width;
-//
-//					// add vertices
-//					if (top == true) {
-//						t = getTile(i, j - 1);
-//						if (!t.isSolid() && !checkForStaticEntities(i, j - 1)) {
-//							graph.createEdge(pos, pos - width, 1);
-//						} else {
-//							top = false;
-//							topLeft = false;
-//							topRight = false;
-//						}
-//					}
-//					if (bottom == true) {
-//						t = getTile(i, j + 1);
-//						if (!t.isSolid() && !checkForStaticEntities(i, j + 1)) {
-//							graph.createEdge(pos, pos + width, 1);
-//						} else {
-//							bottom = false;
-//							bottomLeft = false;
-//							bottomRight = false;
-//						}
-//					}
-//					if (left == true) {
-//						t = getTile(i - 1, j);
-//						if (!t.isSolid() && !checkForStaticEntities(i - 1, j)) {
-//							graph.createEdge(pos, pos - 1, 1);
-//						} else {
-//							left = false;
-//							topLeft = false;
-//							bottomLeft = false;
-//						}
-//					}
-//					if (right == true) {
-//						t = getTile(i + 1, j);
-//						if (!t.isSolid() && !checkForStaticEntities(i + 1, j)) {
-//							graph.createEdge(pos, pos + 1, 1);
-//						} else {
-//							right = false;
-//							bottomRight = false;
-//							topRight = false;
-//						}
-//					}
-//					if (topLeft == true) {
-//						t = getTile(i - 1, j - 1);
-//						if (!t.isSolid() && !checkForStaticEntities(i - 1, j - 1)) {
-//							graph.createEdge(pos, pos - width - 1, hypotenuse);
-//						}
-//					}
-//
-//					if (bottomLeft == true) {
-//						t = getTile(i - 1, j + 1);
-//						if (!t.isSolid() && !checkForStaticEntities(i - 1, j + 1)) {
-//							graph.createEdge(pos, pos + width - 1, hypotenuse);
-//						}
-//					}
-//					if (topRight == true) {
-//						t = getTile(i + 1, j - 1);
-//						if (!t.isSolid() && !checkForStaticEntities(i + 1, j - 1)) {
-//							graph.createEdge(pos, pos - width + 1, hypotenuse);
-//						}
-//					}
-//
-//					if (bottomRight == true) {
-//						t = getTile(i + 1, j + 1);
-//						if (!t.isSolid() && !checkForStaticEntities(i + 1, j + 1)) {
-//							graph.createEdge(pos, pos + width + 1, hypotenuse);
-//						}
-//					}
-//
-//					// reset all booleans to true
-//					topLeft = true;
-//					top = true;
-//					topRight = true;
-//					right = true;
-//					bottomRight = true;
-//					bottom = true;
-//					bottomLeft = true;
-//					left = true;
-//
-//				}
-//			}
-//		}
-//		nextStep[src] = graph.findPaths(src);
+		System.out.println(src);
+		//graph = new Graph(nodes.size());
+
+		// float distance = 0;
+		// for (Node n : nodes) {
+		// for (Node m : nodes) {
+		// distance = Utils.getEuclideanDistance(m.getX(), m.getY(), n.getX(),
+		// n.getY());
+		// if (distance < 200) {
+		// if (!checkForStaticEntities(m.getX(), m.getY(), n.getX(), n.getY())) {
+		// graph.createEdge(m.getVertex(), n.getVertex(), distance);
+		// }
+		// }
+		// }
+		// }
+		int[] path = graph.findPaths(src);
+		for (int i = 0; i < path.length; i++) {
+			//System.out.println("Source Node: " + src + ", Dest node: " + i + ", Next Step: " + path[i]);
+			if (i == src) {
+				nodes.get(src).setNextNodes(null);
+			} else if (path[i] == -1)
+				nodes.get(src).setNextNodes(null);
+			else
+				nodes.get(src).setNextNodes(nodes.get(path[i]));
+		}
 	}
 
 	public EntityManager getEntityManager() {
@@ -305,21 +297,86 @@ public class World {
 
 	public int getHeight() {
 		return height;
-	} 
-
-	public int getNextStep(int src, int dest) {
-		System.out.println(src + "," + dest);
-		return nextStep[src][dest];
 	}
 
-	public boolean checkForStaticEntities(int x, int y) {
-		Rectangle tile = new Rectangle(x * 100, y * 100, 100, 100);
-		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (tile.intersects(e.getCollisionBounds(0, 0))) {
-				return true;
+	public Node getNextStep(int src, int dest) {
+		// System.out.println("Source Node: " + src + ", Dest node: " + dest + ", Next
+		// Step: " + nodes.get(src).getNextNode(dest).getVertex());
+
+		return nodes.get(src).getNextNode(dest);
+
+	}
+
+	public ArrayList<Node> getNodes() {
+		return nodes;
+	}
+
+	public void writeToFile() {
+		try {
+			FileWriter writer = new FileWriter("res/paths.txt");
+			BufferedWriter buffer = new BufferedWriter(writer);
+
+			for (Node n : nodes) {
+				for (Node m : nodes) {
+					if (n.getNextNode(m.getVertex()) == null) {
+						buffer.write("Source: " + n.getVertex() + ", Dest: " + m.getVertex() + ", Next Node: -1");
+					} else
+						buffer.write("Source: " + n.getVertex() + ", Dest: " + m.getVertex() + ", Next Node: "
+								+ n.getNextNode(m.getVertex()).getVertex());
+
+					buffer.newLine();
+				}
+			}
+
+			buffer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// make sure no static entities in between
+	public int getClosestNode(float x, float y) {
+		Node closestNode = null;
+		float closestDistance = 2000000;
+		float currentDistance = 0;
+		for (Node n : nodes) {
+			if (!checkForStaticEntities((int) x, (int) y, n.getX(), n.getY())) {
+				currentDistance = Utils.getEuclideanDistance(x, y, n.getX(), n.getY());
+				if (closestNode == null || currentDistance < closestDistance) {
+					closestNode = n;
+					closestDistance = currentDistance;
+				}
 			}
 		}
 
+		if (closestNode == null) {
+			closestNode = nodes.get(0);
+		}
+		return closestNode.getVertex();
+	}
+
+	public boolean checkForStaticEntities(int x1, int y1, int x2, int y2) {
+		Line2D.Float line = new Line2D.Float(x1, y1, x2, y2);
+		for (InteractableStaticEntity e : entityManager.getInteractables()) {
+			if (line.intersects(e.getCollisionBounds(0, 0))) {
+				if (!handler.getWorld().getEntityManager().getBarriers().contains(e)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public boolean checkWithinStaticEntities(int x, int y) {
+		Ellipse2D.Float point = new Ellipse2D.Float(x, y, 20, 20);
+		for (InteractableStaticEntity e : entityManager.getInteractables()) {
+			if (point.intersects(e.getCollisionBounds(0, 0))) {
+				if (!handler.getWorld().getEntityManager().getBarriers().contains(e)) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 

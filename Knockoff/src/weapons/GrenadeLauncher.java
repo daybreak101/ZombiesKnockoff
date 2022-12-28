@@ -7,7 +7,7 @@ import main.Handler;
 public class GrenadeLauncher extends Gun{
 
 	public GrenadeLauncher(Handler handler) {
-		super(handler, 1500, 50, 300, 6, 60, 0.6f, 6);
+		super(handler, 1000, 50, 300, 6, 60, 0.6f, 6);
 		this.name = "Grenade Launcher";
 		originalName = name;
 		upgradedName = "Rolling Thumper";

@@ -12,14 +12,16 @@ public class PointGainElement extends HudElement {
 
 	private int pointsGained;
 	private int alpha, type, fontSize;
+	private boolean isGain;
 
-	public PointGainElement(Handler handler, int pointsGained) {
+	public PointGainElement(Handler handler, int pointsGained, boolean gain) {
 		super(40, (int) handler.getHeight() / 2 + 150, 0, 0, handler);
 		this.pointsGained = pointsGained;
 		alpha = 255;
 		fontSize = 30;
 		Random rand = new Random();
 		type = rand.nextInt(0, 4);
+		this.isGain = gain;
 
 	}
 
@@ -31,11 +33,11 @@ public class PointGainElement extends HudElement {
 		alpha -= 2;
 
 		fontTick.tick();
-		if(fontTick.isReady()) {
+		if (fontTick.isReady()) {
 			fontTick.resetTimer();
 			fontSize--;
 		}
-		
+
 		if (alpha <= 0)
 			isActive = false;
 
@@ -44,9 +46,16 @@ public class PointGainElement extends HudElement {
 	@Override
 	public void render(Graphics g) {
 		// TODO Auto-generated method stub
-		g.setColor(new Color(255, 255, 0, alpha));
-		g.setFont(new Font(Font.DIALOG, Font.PLAIN, fontSize));
-		g.drawString("+" + pointsGained, (int) x, (int) y);
+		if (isGain) {
+			g.setColor(new Color(255, 255, 0, alpha));
+			g.setFont(new Font(Font.DIALOG, Font.PLAIN, fontSize));
+			g.drawString("+" + pointsGained, (int) x, (int) y);
+		} else {
+			g.setColor(new Color(255, 100, 0, alpha));
+			g.setFont(new Font(Font.DIALOG, Font.PLAIN, fontSize));
+			g.drawString("-" + pointsGained, (int) x, (int) y);
+		}
+
 	}
 
 }

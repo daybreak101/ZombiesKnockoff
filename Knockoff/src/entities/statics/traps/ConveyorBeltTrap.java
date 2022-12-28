@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
+import entities.blood.Blood;
 import entities.creatures.Stoker;
 import entities.creatures.Zombie;
 import entities.creatures.ZombieType;
@@ -57,7 +58,7 @@ public class ConveyorBeltTrap extends Trap {
 		if (handler.getPlayer().getHitbox().intersects(furnace)) {
 			handler.getPlayer().takeDamage(handler.getPlayer().getHealth());
 		}
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getHitBox(0, 0).intersects(furnace)) {
 				if (e.getZombieType() == ZombieType.STOKER) {
 					((Stoker) e).getAngry();
@@ -70,12 +71,16 @@ public class ConveyorBeltTrap extends Trap {
 	
 	public void moveEntitiesTowardFurnace() {
 		if (handler.getPlayer().getHitbox().intersects(conveyor)) {
-			handler.getPlayer().setxMove(3);
-			handler.getPlayer().moveX();
+			handler.getPlayer().addToMoveX(2);
 		}
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getHitBox(0, 0).intersects(conveyor)) {
 				e.setxMove(7);
+				e.moveX();
+			}
+		}
+		for(Blood e: handler.getWorld().getEntityManager().getBlood()) {
+			if(e.getBloodType() != -1 && e.getRect().intersects(conveyor)) {
 				e.moveX();
 			}
 		}

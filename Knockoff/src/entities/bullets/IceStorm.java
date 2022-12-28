@@ -42,7 +42,7 @@ public class IceStorm extends Bullet {
 		cb = new Rectangle((int) (x + bounds.x - 1), (int) (y + bounds.y - 1), width + 1, height + 1);
 		stormRadius = new Ellipse2D.Float((int) (x - 150), (int) (y - 150), 300, 300);
 
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (stormRadius.intersects(e.getHitBox(0, 0))) {
 				e.freeze();
 			}

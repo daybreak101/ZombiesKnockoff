@@ -1,11 +1,13 @@
 package hud;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
@@ -17,6 +19,7 @@ import entities.statics.InteractableStaticEntity;
 import graphics.Assets;
 import main.Handler;
 import perks.Perk;
+import utils.Utils;
 import weapons.Gun;
 
 public class GameplayElement extends HudElement {
@@ -26,7 +29,7 @@ public class GameplayElement extends HudElement {
 	private Perk[] perks;
 	private Gun gun;// = handler.getWorld().getEntityManager().getPlayer().getInv().getGun();
 	private Color hudColor;
-	
+
 	public GameplayElement(Handler handler) {
 		super(0, 0, 0, 0, handler);
 		maxStamina = 1;
@@ -39,21 +42,36 @@ public class GameplayElement extends HudElement {
 	public void tick() {
 		Player player = handler.getWorld().getEntityManager().getPlayer();
 		hudColor = handler.getSettings().getHudColor();
-		
+
 		grenades = player.getInv().getGrenades();
 		health = player.getHealth();
-		
-		
+
 		interactText = "";
-		Ellipse2D.Float radius = new Ellipse2D.Float(handler.getPlayer().getX() - 100, handler.getPlayer().getY() - 100, 200, 200);
+
+		Ellipse2D.Float radius = new Ellipse2D.Float(handler.getPlayer().getX() - 100, handler.getPlayer().getY() - 100,
+				200, 200);
+		InteractableStaticEntity closestInteract = null;
+		float closestDist = 2000000;
+		float eDist;
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (e != null) {
-				if(radius.intersects(e.getTriggerRange())) {
-					interactText =  e.getTriggerText();
-				}
+			eDist = Utils.getEuclideanDistance(player.getX(), player.getY(), e.getX(), e.getY());
+			if (closestInteract == null) {
+				closestInteract = e;
+				closestDist = eDist;
+			}
+			if (eDist < closestDist) {
+				closestInteract = e;
+				closestDist = eDist;
 			}
 		}
-		
+
+		if (closestInteract != null) {
+			if (radius.intersects(closestInteract.getTriggerRange())) {
+				interactText = closestInteract.getTriggerText();
+
+			}
+		}
+
 		perks = player.getInv().getPerks();
 		points = player.getInv().getPoints();
 		currentStamina = player.getCurrentStamina();
@@ -100,14 +118,36 @@ public class GameplayElement extends HudElement {
 
 	public void renderHealthAndArmor(Graphics g) {
 		// render health
-		g.setColor(new Color(128, 0, 0));
-		g.fillRect((int) 100, (int) handler.getHeight() - 100, 100, 50);
 
+		g.setColor(new Color(128, 0, 0));
+		if (handler.getPlayer().getInv().isJugg()) {
+			g.fillRect((int) 100, (int) handler.getHeight() - 100, 150, 50);
+
+		} else {
+			g.fillRect((int) 100, (int) handler.getHeight() - 100, 100, 50);
+		}
 		g.setColor(hudColor);
 		g.fillRect((int) 100, (int) handler.getHeight() - 100, health, 50);
 
 		g.setColor(Color.BLUE);
 		g.fillRect((int) 100, (int) handler.getHeight() - 60, armor, 10);
+
+		g.setColor(new Color(128, 0, 0));
+		g.fillOval(49, (int) handler.getHeight() - 105, 60, 60);
+		g.setColor(Color.black);
+
+		Graphics2D g2 = (Graphics2D) g;
+		float thickness = 5;
+		Stroke oldStroke = g2.getStroke();
+		g2.setStroke(new BasicStroke(thickness));
+	
+		g.drawOval(49, (int) handler.getHeight() - 105, 60, 60);
+		g2.setStroke(oldStroke);
+
+		g.setFont(new Font(Font.DIALOG, Font.BOLD, 100));
+		g.setColor(Color.white);
+		g.drawString("+", 50, (int) handler.getHeight() - 40);
+
 	}
 
 	public void renderInteractionText(Graphics g) {
@@ -139,23 +179,23 @@ public class GameplayElement extends HudElement {
 
 	public void renderPowerups(Graphics g) {
 
-		//make sure to remove those that are inactive
-		for(PowerUps e : handler.getWorld().getEntityManager().getPowerups()) {
-			if(e.isPickedUp() && e.getIcon() != null && !powerups.contains(e)) {
+		// make sure to remove those that are inactive
+		for (PowerUps e : handler.getWorld().getEntityManager().getPowerups()) {
+			if (e.isPickedUp() && e.getIcon() != null && !powerups.contains(e)) {
 				powerups.add(e);
 			}
 		}
-		for(PowerUps e: powerups) {
-			if(!handler.getWorld().getEntityManager().getPowerups().contains(e)) {
+		for (PowerUps e : powerups) {
+			if (!handler.getWorld().getEntityManager().getPowerups().contains(e)) {
 				powerups.remove(e);
 				break;
 			}
 		}
-		
+
 		int powerupY = (int) handler.getHeight() - 100;
 		int square = 50;
 
-		//change powerups .size() to an array that only contains powerups picked up
+		// change powerups .size() to an array that only contains powerups picked up
 		if (powerups.size() == 1) {
 			if (oneX < handler.getWidth() / 2 - 25) {
 				oneX++;
@@ -241,7 +281,7 @@ public class GameplayElement extends HudElement {
 	public void renderZombiesLeft(Graphics g) {
 		// render zombiesleft
 		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 20));
-		g.drawString("Zombies Left: " + Integer.toString(zombiesLeft), (int) handler.getWidth() - 300, (int) 250);
+		g.drawString("Zombies Left: " + Integer.toString(zombiesLeft), (int) handler.getWidth() - 200, (int) 300);
 	}
 
 	@Override
@@ -255,7 +295,7 @@ public class GameplayElement extends HudElement {
 		renderPowerups(g);
 		renderRound(g);
 		renderStamina(g);
-		if(handler.getSettings().isZombieCounter())
+		if (handler.getSettings().isZombieCounter())
 			renderZombiesLeft(g);
 
 		Point2D center = new Point2D.Float(500, 500);

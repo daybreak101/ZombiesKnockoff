@@ -235,17 +235,18 @@ public class Inventory {
 		if (handler.getRoundLogic().getPowerups().isDoublePointsActive()) {
 			points += (add * 2);
 			player.getStats().gainScore(add * 2);
-			handler.getHud().addObject(new PointGainElement(handler, add));
+			handler.getHud().addObject(new PointGainElement(handler, add * 2, true));
 		} else {
 			points += add;
 			player.getStats().gainScore(add);
-			handler.getHud().addObject(new PointGainElement(handler, add));
+			handler.getHud().addObject(new PointGainElement(handler, add, true));
 		}
 	}
 
 	public boolean purchase(int price) {
 		if (price <= points) {
 			points -= price;
+			handler.getHud().addObject(new PointGainElement(handler, price, false));
 			return true;
 		}
 		return false;

@@ -15,8 +15,8 @@ public class Licker extends Zombie {
 		super(handler, x, y, dspeed, health);
 		zombieType = LICKER;
 		zombieAnim = new Animation(300, Assets.lickerAnim);
-		this.speed =6.0f +  dspeed + 0.5f;
-		this.health = health - 200;
+		this.speed = 5.0f +  dspeed + 0.5f;
+		this.health = health/2;
 		this.width = 90;
 		this.height = 90;
 		bounds.width = 20;

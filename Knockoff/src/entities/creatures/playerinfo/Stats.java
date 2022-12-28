@@ -12,12 +12,13 @@ public class Stats {
 
 	private Handler handler;
 	//current game
-	private int kills, downs, score;
+	private int kills, headshots, downs, score;
 
 	
 	public Stats(Handler handler) {
 		this.handler = handler;
 		kills = 0;
+		headshots = 0;
 		score = 0;
 		downs = 0;
 		
@@ -61,6 +62,19 @@ public class Stats {
 
 	public void setScore(int score) {
 		this.score = score;
+	}
+
+
+
+	public int getHeadshots() {
+		return headshots;
+	}
+
+
+
+	public void addHeadshot() {
+		this.headshots++;
+		handler.getGlobalStats().addHeadshot();
 	}
 
 

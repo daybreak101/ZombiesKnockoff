@@ -62,7 +62,7 @@ public class Knife {
 			Zombie closestZombie = null;
 			float closestDist = 999999;
 			float zDist;
-			for (Zombie z : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+			for (Zombie z : handler.getWorld().getEntityManager().getZombies()) {
 				if (meleeArc.intersects(z.getHitBox(0, 0))) {
 					zDist = Utils.getEuclideanDistance(playerX, playerY, z.getX(), z.getY());
 					if (closestZombie == null) {

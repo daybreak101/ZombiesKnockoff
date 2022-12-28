@@ -20,7 +20,7 @@ public class Toxen extends Zombie {
 		super(handler, x, y, dspeed, health);
 		zombieType = TOXEN;
 		speed = 2.0f + dspeed - 1f;
-		this.health = health * 2;
+		this.health = health * 3;
 		shootTimer = new Timer(500);
 	}
 	

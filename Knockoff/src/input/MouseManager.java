@@ -100,8 +100,8 @@ public class MouseManager implements MouseListener, MouseMotionListener, MouseWh
 		if(uiManager != null)
 			uiManager.onMouseRelease(e);
 		
-		if(State.getState() == handler.getGame().gameState && e.getButton() == MouseEvent.BUTTON1) {
-			handler.getWorld().getEntityManager().getPlayer().getInv().getGun().setReadyToFire(false);
+		if(State.getState() == handler.getGame().gameState && e.getButton() == MouseEvent.BUTTON1 && handler.getPlayer().getInv().getGun() != null) {
+			handler.getPlayer().getInv().getGun().setReadyToFire(false);
 			leftPressed = false;
 		}
 	}

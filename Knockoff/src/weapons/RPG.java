@@ -7,7 +7,7 @@ import main.Handler;
 public class RPG extends Gun{
 
 	public RPG(Handler handler) {
-		super(handler, 2500, 10, 140, 1, 10, 1.1f, 10000);
+		super(handler, 2000, 10, 140, 1, 10, 1.1f, 10000);
 		this.name = "RPG";
 		originalName = name;
 		upgradedName = "Get sum protection (;";

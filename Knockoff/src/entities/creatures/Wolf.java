@@ -42,7 +42,7 @@ public class Wolf extends Creature {
 			Zombie closestZombie = null;
 			float closestDist = 2000000;
 			float eDist;
-			for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+			for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 				eDist = Utils.getEuclideanDistance(x, y, e.getX(), e.getY());
 				if (closestZombie == null) {
 					closestZombie = e;

@@ -27,7 +27,7 @@ public class SniperBullet extends Bullet{
 			damageMultiplier += handler.getPlayer().getStrongholdDamageMultiplier();
 		}
 		
-		for(Zombie e: handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for(Zombie e: handler.getWorld().getEntityManager().getZombies()) {
 			if(e.getHitBox(0, 0).intersects(cb)) {
 				if(e.getSniperBullet() == null) {
 					e.takeDamage((int) (gunFiredFrom.getDamage() * damageMultiplier)); 

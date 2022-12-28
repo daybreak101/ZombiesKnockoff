@@ -8,7 +8,7 @@ import sounds.Sounds;
 public class M4 extends Gun {
 
 	public M4(Handler handler) {
-			super(handler, 360, 8, 100, 30, 300, 0.4f, 100);
+			super(handler, 270, 8, 100, 30, 300, 0.4f, 100);
 			this.name = "M4";
 			originalName = name;
 			upgradedName = "Massacre '64";

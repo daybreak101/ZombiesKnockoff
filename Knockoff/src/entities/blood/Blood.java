@@ -72,7 +72,7 @@ public class Blood {
 	}
 	
 	public void damageZombies() {
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies().getObjects()) {
+		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getCollisionBounds(0, 0).intersects(rect) && e.getZombieType() != bloodType && damageTimer.isReady()) {	
 				if(bloodType == ZombieType.STOKER) {
 					handler.getPlayer().setBurn(damageToZombie/5);
@@ -85,6 +85,7 @@ public class Blood {
 	
 
 	public void tick() {
+		rect = new Rectangle((int) x, (int) y, width, height);
 		counter++;
 		damageTimer.tick();
 		damagePlayer();
@@ -102,5 +103,17 @@ public class Blood {
 
 	public int getTimer() {
 		return timer;
+	}
+	
+	public int getBloodType() {
+		return bloodType;
+	}
+	
+	public void moveX() {
+		x+=2;
+	}
+	
+	public Rectangle getRect() {
+		return rect;
 	}
 }

@@ -12,7 +12,7 @@ public class Minigun extends Gun {
 	private int windupMax = 40;
 
 	public Minigun(Handler handler) {
-		super(handler, 2500, 2, 0, 0, 0, 1.5f, 50);
+		super(handler, 10000, 2, 0, 0, 0, 1.5f, 50);
 		name = "Minigun";
 	}
 	
@@ -47,7 +47,7 @@ public class Minigun extends Gun {
 	public void shootAsTurret(float x, float y) {
 		int lowestDistanceSoFar = 2000000;
 		Zombie closestEntity = null;
-		for (Zombie entity : handler.getWorld().getEntityManager().getZombies().getObjects()) { // This loops through all the entities, setting the variable "entity" to each element.
+		for (Zombie entity : handler.getWorld().getEntityManager().getZombies()) { // This loops through all the entities, setting the variable "entity" to each element.
 		    int zombieX = (int) (x - entity.getX());
 		    int zombieY = (int) (y - entity.getY());
 		    double distance = Math.sqrt((zombieX * zombieX) + (zombieY * zombieY));

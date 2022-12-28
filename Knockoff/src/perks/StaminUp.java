@@ -15,14 +15,14 @@ public class StaminUp extends Perk {
 	@Override
 	public void buff() {
 		handler.getPlayer().getInv().setStaminup(true);
-		handler.getPlayer().setDefaultSpeed(Creature.DEFAULT_SPEED + 0.5f);
+		handler.getPlayer().setDefaultSpeed(4.5f);
 		
 	}
 
 	@Override
 	public void debuff() {
 		handler.getPlayer().getInv().setStaminup(false);
-		handler.getPlayer().setDefaultSpeed(Creature.DEFAULT_SPEED);
+		handler.getPlayer().setDefaultSpeed(4.0f);
 	}
 
 }

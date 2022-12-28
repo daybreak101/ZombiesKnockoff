@@ -22,7 +22,11 @@ public class GameState extends State {
 		
 		Sounds.init();
 		
-		world = new World(handler, "/worlds/test/world1.txt", "/worlds/test/entities.txt");
+		world = new World(handler,
+				"/worlds/test/world1.txt", 
+				"/worlds/test/entities.txt",
+				"/worlds/test/nodes.txt",
+				"/worlds/test/edges.txt");
 		//world = new World(handler, "/worlds/factory/world1.txt", "/worlds/factory/entities.txt");
 		handler.setWorld(world);
 		
