@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 
 import entities.creatures.Player;
 import entities.statics.InteractableStaticEntity;
+import entities.statics.Wall;
 import main.Handler;
 
 public class ToxenBullet extends Bullet {
@@ -21,8 +22,8 @@ public class ToxenBullet extends Bullet {
 		float moveToY = handler.getPlayer().getY() - y;
 
 		float angle = (float) Math.atan2(moveToY, moveToX);
-		xMove = (float) (speed * Math.cos(angle));
-		yMove = (float) (speed * Math.sin(angle));
+		xMove = (float) ( Math.cos(angle));
+		yMove = (float) ( Math.sin(angle));
 	}
 	
 	int color = 0;
@@ -48,14 +49,21 @@ public class ToxenBullet extends Bullet {
 		cb = new Rectangle((int)(x + bounds.x - 1), (int)(y + bounds.y - 1), bounds.width + 1, bounds.height + 1);
 		Player player = handler.getWorld().getEntityManager().getPlayer();
 		
-		if(player.getCollisionBounds(0, 0).intersects(cb)) {
-			player.takeDamage(15);
+		if(player.getCollisionBounds(0, 0).intersects(cb) && !player.getJustTookDamage()) {
+			player.takeDamage(5);
+			player.justTookDamage();
 			handler.getWorld().getEntityManager().getEntities().remove(this);
 			return true;
 		}
 		
 		for(InteractableStaticEntity e: handler.getWorld().getEntityManager().getInteractables()){
 			if(e.getCollisionBounds(0, 0).intersects(cb)) {
+				handler.getWorld().getEntityManager().getEntities().remove(this);
+				return true;
+			}
+		}
+		for (Wall e : handler.getWorld().getEntityManager().getWalls()) {
+			if (e.getCollisionBounds(0, 0).intersects(cb)) {
 				handler.getWorld().getEntityManager().getEntities().remove(this);
 				return true;
 			}

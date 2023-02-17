@@ -8,7 +8,7 @@ import sounds.Sounds;
 public class Winchester1876 extends Gun{
 
 	public Winchester1876(Handler handler) {
-		super(handler, 130, 40, 50, 6, 60, 0.5f, 8);
+		super(handler, 200, 40, 50, 6, 60, 0.5f, 8);
 		this.name = "Winchester 1876";
 		originalName = name;
 		upgradedName = "Yee chester";

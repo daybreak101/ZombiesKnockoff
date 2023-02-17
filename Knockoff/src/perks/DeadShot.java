@@ -7,15 +7,15 @@ public class DeadShot extends Perk{
 	
 	//increased range, increase crit chance and crit damage
 
-	public DeadShot(Handler handler) {
-		super(handler);
+	public DeadShot(Handler handler, int level) {
+		super(handler, level);
 		this.name = "DeadShot";
 		this.icon = Assets.deadshot;
 	}
 
 	@Override
 	public void buff() {
-		handler.getPlayer().getInv().setDeadshot(true);
+		handler.getPlayer().getInv().setDeadshot(level);
 		
 		
 		
@@ -23,7 +23,7 @@ public class DeadShot extends Perk{
 
 	@Override
 	public void debuff() {
-		handler.getPlayer().getInv().setDeadshot(false);
+		handler.getPlayer().getInv().setDeadshot(-1);
 		
 	}
 

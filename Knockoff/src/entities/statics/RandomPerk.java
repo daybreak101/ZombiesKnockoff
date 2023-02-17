@@ -39,10 +39,10 @@ public class RandomPerk extends InteractableStaticEntity{
 		//spin for perk
 		
 		if(isSpun == false && cooldownTimer >= cooldown) {
-			if(isSpun == false && !handler.getWorld().getEntityManager().getPlayer().checkPerkEmptySpot()) {
+			if(isSpun == false && !handler.getWorld().getEntityManager().getPlayer().getInv().checkPerkEmptySpot()) {
 				fullPerks = true;
 			}
-			else if(handler.getWorld().getEntityManager().getPlayer().purchase(2000)) {
+			else if(handler.getWorld().getEntityManager().getPlayer().getInv().purchase(2000)) {
 				isSpun = true;
 				cantAfford = false;
 				cooldownTimer = 0;
@@ -51,7 +51,7 @@ public class RandomPerk extends InteractableStaticEntity{
 				
 				
 				//don't give a perk player already has
-				while(handler.getWorld().getEntityManager().getPlayer().checkPerks(perk)) {
+				while(handler.getWorld().getEntityManager().getPlayer().getInv().checkPerks(perk)) {
 					perk = getRandomPerk();
 				}
 			}
@@ -66,7 +66,7 @@ public class RandomPerk extends InteractableStaticEntity{
 			isSpun = false;
 			isSpunTimer = 0;
 			handler.getGlobalStats().addPerk();
-			handler.getWorld().getEntityManager().getPlayer().addPerk(perk);
+			handler.getWorld().getEntityManager().getPlayer().getInv().addPerk(perk);
 		}
 		
 	}
@@ -77,31 +77,31 @@ public class RandomPerk extends InteractableStaticEntity{
 		
 		switch(rng) {
 		case 0:
-			return new Juggernaut(handler);
+			return new Juggernaut(handler, 0);
 		case 1:
-			return new SleightOfHand(handler);
+			return new SleightOfHand(handler, 0);
 		case 2:
-			return new DoubleTap(handler);
+			return new DoubleTap(handler, 0);
 		case 3:
-			return new DeadShot(handler);
+			return new DeadShot(handler, 0);
 		case 4:
-			return new PhD(handler);
+			return new PhD(handler,0);
 		case 5:
-			return new StaminUp(handler);
+			return new StaminUp(handler,0);
 		case 6:
-			return new Vampire(handler);
+			return new Vampire(handler,0);
 		case 7:
-			return new MuleKick(handler);
-		case 8:
-			return new Bandolier(handler);
-		case 9:
-			return new Revive(handler);
-		case 10: 
-			return new Luna(handler);
+			return new MuleKick(handler,0);
+		//case 8:
+		//	return new Bandolier(handler,0);
+		//case 9:
+			//return new Revive(handler,0);
+		//case 10: 
+		//	return new Luna(handler,0);
 		case 11: 
-			return new Stronghold(handler);
+			return new Stronghold(handler,0);
 		}
-		return new DeadShot(handler);
+		return new MuleKick(handler,3);
 	}
 	
 
@@ -111,11 +111,11 @@ public class RandomPerk extends InteractableStaticEntity{
 		
 		if(cantAfford == true && cooldownTimer < cooldown) {
 			isSpunTimer = 0;
-			triggerText = "              Not enough points!";
+			triggerText = "Not enough points!";
 		}
 		else if(fullPerks == true && cooldownTimer < cooldown) {
 			isSpunTimer = 0;
-			triggerText = "           Can only have four perks!";
+			triggerText = "Can only have four perks!";
 		}	
 		else if(isSpun == true && cooldownTimer >= cooldown) {
 			triggerText = "Press F to pick up " + perk.getName();
@@ -130,7 +130,7 @@ public class RandomPerk extends InteractableStaticEntity{
 			perk = null;
 		}
 		else if(isSpun == true) {
-			triggerText = "            Spinning...";
+			triggerText = "Spinning...";
 		}
 		else {
 			triggerText = "";

@@ -24,4 +24,12 @@ public class Timer {
 		}
 		return false;
 	}
+	
+	public float getProgress() {
+		return (float) counter / (float) limit;
+	}
+	
+	public float getDecrementalProgress() {
+		return (float) 1 - (float) getProgress();
+	}
 }

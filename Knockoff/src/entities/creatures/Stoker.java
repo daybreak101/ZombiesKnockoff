@@ -56,7 +56,7 @@ public class Stoker extends Zombie {
 
 	// implement where stoker only shoots when near player
 	public void postTick() {
-		if (!isFrozen) {
+		if (!freezeStatus.isFrozen()) {
 			if (isAngry == false) {
 				fireballAttack();
 			}
@@ -109,9 +109,21 @@ public class Stoker extends Zombie {
 
 	@Override
 	public void die() {
-		if (handler.getPlayer().getInv().isVamp())
-			handler.getPlayer().incrementHealth();
-
+		if(handler.getPlayer().getInv().getVamp() >= 1) {
+			handler.getPlayer().incrementTempHealth(5);
+		}
+		else if (handler.getPlayer().getInv().getVamp() >= 0) {
+			handler.getPlayer().incrementTempHealth(1);
+		}
+		if(handler.getPlayer().getInv().getStronghold() == 3) {
+			if(handler.getPlayer().getStrongholdRadius() != null) {
+				if(handler.getPlayer().getStrongholdRadius().intersects(getHitBox(0,0))) {
+					handler.getPlayer().gainArmor(5);
+					handler.getPlayer().gainStrongholdDamageMultiplier(.05f);
+				}
+			}
+		}
+		handler.getPlayer().getStats().gainKill();
 		// put "flame" effect on death as blood that stays there for 7 seconds
 		handler.getWorld().getEntityManager().addBlood(new Blood(handler, x, y, ZombieType.STOKER));
 	}

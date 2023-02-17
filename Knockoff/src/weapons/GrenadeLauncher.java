@@ -7,7 +7,7 @@ import main.Handler;
 public class GrenadeLauncher extends Gun{
 
 	public GrenadeLauncher(Handler handler) {
-		super(handler, 1000, 50, 300, 6, 60, 0.6f, 6);
+		super(handler, 1000, 50, 300, 6, 60, 0.6f, 15);
 		this.name = "Grenade Launcher";
 		originalName = name;
 		upgradedName = "Rolling Thumper";
@@ -20,10 +20,12 @@ public class GrenadeLauncher extends Gun{
 			readyToFire = false;
 			currentClip--;
 			handler.getWorld().getEntityManager().addEntity(new Grenade(handler, 
-					player.getX() + player.getWidth()/2,
-					player.getY() + player.getHeight()/2,
-					true
-					));
+						player.getX() + player.getWidth()/2,
+						player.getY() + player.getHeight()/2
+						,isUpgraded,
+						handler.getMouseManager().getMouseX() + handler.getGameCamera().getxOffset(),
+						handler.getMouseManager().getMouseY() + handler.getGameCamera().getyOffset()
+						));
 			
 			timerToFire = 0;
 		}

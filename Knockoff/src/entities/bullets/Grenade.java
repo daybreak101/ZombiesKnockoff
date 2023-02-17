@@ -8,28 +8,37 @@ import java.awt.geom.Ellipse2D;
 
 import entities.creatures.Zombie;
 import entities.statics.InteractableStaticEntity;
+import entities.statics.Wall;
 import main.Handler;
 
 public class Grenade extends Bullet {
 
 	private int counter, timer, explosionTimer;
 	private Ellipse2D explosionRadius;
-	//private Arc2D.Float[] explosionRadius;
 	private Color color;
 	private boolean isImpact;
+	private float destX, destY;
 
-	public Grenade(Handler handler, float x, float y) {
+	//normal grenades
+	public Grenade(Handler handler, float x, float y, boolean isImpact, float destX, float destY) {
 		super(handler, x, y, 10000);
+		x = (int) x;
+		y = (int) y;
 		width = 10;
 		height = 10;
 		counter = 0;
-		timer = 7;
+		timer = 60;
 		explosionTimer = 65;
-		speed = 0.2f;
+		speed = 8;
 		this.color = Color.orange;
-		isImpact = false;
+		this.isImpact = isImpact;
+		xMove = (float) ( Math.cos(angle));
+		yMove = (float) ( Math.sin(angle));
+		this.destX = destX;
+		this.destY = destY;
 	}
 
+	//idk
 	public Grenade(Handler handler, float x, float y, Color color) {
 		super(handler, x, y, 10000);
 		width = 10;
@@ -37,21 +46,11 @@ public class Grenade extends Bullet {
 		counter = 0;
 		timer = 7;
 		explosionTimer = 65;
-		speed = 0.2f;
+		speed = 15;
 		this.color = color;
 		isImpact = false;
-	}
-
-	public Grenade(Handler handler, float x, float y, boolean isImpact) {
-		super(handler, x, y, 10000);
-		width = 10;
-		height = 10;
-		counter = 0;
-		timer = 7;
-		explosionTimer = 65;
-		speed = 0.2f;
-		this.color = Color.orange;
-		this.isImpact = isImpact;
+		xMove = (float) (speed * Math.cos(angle));
+		yMove = (float) (speed * Math.sin(angle));
 	}
 
 	public void tick() {
@@ -74,13 +73,25 @@ public class Grenade extends Bullet {
 					handler.getWorld().getEntityManager().getEntities().remove(this);
 				}
 			}
-			moveX();
-			moveY();
+			while(travelTicker < speed) {
+				moveX();
+				moveY();
+				travelTicker++;
+				
+				if(((int) x == (int) destX || (int) y == (int) destY) && !slowed) {
+					slowed = true;
+					speed = speed/8;
+				}
+				
+			}
+			travelTicker = 0;
 		}
 	}
+	
+	boolean slowed = false;
 
 	public boolean checkForImpact() {
-		cb = new Rectangle((int) (x + bounds.x - 1), (int) (y + bounds.y - 1), bounds.width + 2, bounds.height + 2);
+		cb = new Rectangle((int) (x), (int) (y), width, height);
 
 		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getCollisionBounds(0, 0).intersects(cb)) {
@@ -89,7 +100,13 @@ public class Grenade extends Bullet {
 		}
 
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (!handler.getWorld().getEntityManager().getBarriers().contains(e) && e.getCollisionBounds(0, 0).intersects(cb)) {
+			if (!handler.getWorld().getEntityManager().getBarriers().contains(e)
+					&& e.getCollisionBounds(0, 0).intersects(cb)) {
+				return true;
+			}
+		}
+		for (Wall e : handler.getWorld().getEntityManager().getWalls()) {
+			if (e.getCollisionBounds(0, 0).intersects(cb)) {
 				return true;
 			}
 		}
@@ -97,84 +114,63 @@ public class Grenade extends Bullet {
 
 	}
 
-//	public void initializeArcs() {
-//		explosionRadius = new Arc2D.Float[12];
-//		for (int i = 0; i < 12; i++) {
-//			explosionRadius[i] = new Arc2D.Float(x + width/2 - 100, y + height/2 - 100, 200,200, 30 * i,
-//					30, Arc2D.PIE);
-//		}
-//	}
-
 	public void findEntitiesInRadius() {
 		float damageMultiplier = 1;
-		if (handler.getPlayer().getInv().isDoubletap()) {
+		if (handler.getPlayer().getInv().getPhd() == 3) {
 			damageMultiplier += 1;
 		}
-		if (handler.getPlayer().getInv().isStronghold()) {
+		if (handler.getPlayer().getInv().getStronghold() > -1) {
 			damageMultiplier += handler.getPlayer().getStrongholdDamageMultiplier();
 		}
 
 		explosionRadius = new Ellipse2D.Float(x - 100, y - 100, 200, 200);
-		//initializeArcs();
-//		boolean isActive = true;
-//		for (int i = 0; i < 12; i++) {
-//			for(InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-//				if(!handler.getWorld().getEntityManager().getBarriers().contains(e) &&
-//						explosionRadius.intersects(e.getCollisionBounds(0, 0))) {
-//					isActive = false;
-//					break;
-//				}
-//			}
-//			
-//
-//			if (isActive) {
-				for (Zombie f : handler.getWorld().getEntityManager().getZombies()) {
-					int damage = 1000;
-					if (isImpact) {
-						damage = (int) (gunFiredFrom.getDamage() * damageMultiplier);
-					}
-					if (explosionRadius.intersects(f.getHitBox(0, 0))) {
-						f.takeDamage((int) (damage * damageMultiplier));
-						if (f.getHealth() / handler.getRoundLogic().getZombieHealth() < (f.getHealth() * 3 / 10)
-								&& f.getZombieType() == 0) {
-							f.turnToCrawler();
-						}
-					}
+		for (Zombie f : handler.getWorld().getEntityManager().getZombies()) {
+			int damage = 1000;
+			if (isImpact) {
+				damage = (int) (gunFiredFrom.getDamage() * damageMultiplier);
+			}
+			if (explosionRadius.intersects(f.getHitBox(0, 0))) {
+				f.takeDamage((int) (damage * damageMultiplier));
+				float currentPercent = (float) ((float) f.getHealth() / (float) f.getMaxHealth());
+				float thirtyPercent = (float) ((float) (f.getMaxHealth() * 3 / 10) / (float) f.getMaxHealth());
+				if (currentPercent < thirtyPercent && f.getZombieType() == 0) {
+					f.turnToCrawler();
 				}
+			}
+		}
 
-				if (explosionRadius.intersects(handler.getPlayer().getCollisionBounds(0, 0))) {
-					if (!handler.getPlayer().getInv().isPhd())
-						handler.getPlayer().takeDamage(60);
-				}
-				handler.getWorld().getEntityManager().addBlood(new Explosion(handler, x - 100, y - 100, 200, 200, color));
+		if (explosionRadius.intersects(handler.getPlayer().getCollisionBounds(0, 0))) {
+			handler.getPlayer().takeExplosionDamage(60);
+		}
+		handler.getWorld().getEntityManager().addBlood(new Explosion(handler, x - 100, y - 100, 200, 200, color));
 
-		//	}
-		//}
 	}
 
 	public void findPlayerInRadius() {
-		Ellipse2D.Float dmgRadius = new Ellipse2D.Float(x - 100, y - 100, 200, 200);
+		explosionRadius = new Ellipse2D.Float(x - 100, y - 100, 200, 200);
 		handler.getWorld().getEntityManager().addBlood(new Explosion(handler, x - 100, y - 100, 200, 200, color));
-		if (dmgRadius.intersects(handler.getPlayer().getCollisionBounds(0, 0))) {
-			handler.getPlayer().takeDamage(20);
+		if (explosionRadius.intersects(handler.getPlayer().getCollisionBounds(0, 0))) {
+			handler.getPlayer().takeExplosionDamage(20);
 		}
 	}
 
 	public void moveX() {
-		if (!checkForImpact()) {
-			x += xMove;
-		} else {
+		x += xMove;
+		if (checkForImpact()) {
+			speed = speed/4;
+			x -= xMove;
 			xMove = -xMove;
 		}
 
 	}
 
 	public void moveY() {
-		if (!checkForImpact()) {
-			y += yMove;
-		} else {
+		y += yMove;
+		if (checkForImpact()) {
+			speed = speed/4;
+			y -= yMove;
 			yMove = -yMove;
-		}
+		} 
 	}
 
 	@Override

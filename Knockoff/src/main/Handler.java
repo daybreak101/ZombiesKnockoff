@@ -17,6 +17,7 @@ public class Handler {
 	private HudManager hud;
 	private Settings settings;
 	private GlobalStats globalStats;
+	private Progression progression;
 	
 	public Player getPlayer() {
 		return player;
@@ -30,6 +31,7 @@ public class Handler {
 		this.game = game;
 		settings = new Settings(this);
 		globalStats = new GlobalStats(this);
+		progression = new Progression(this);
 	}
 	
 	public GameCamera getGameCamera() {
@@ -93,6 +95,16 @@ public class Handler {
 	public void setGlobalStats(GlobalStats globalStats) {
 		this.globalStats = globalStats;
 	}
+
+	public Progression getProgression() {
+		return progression;
+	}
+
+	public void setProgression(Progression progression) {
+		this.progression = progression;
+	}
+	
+	
 
 	
 }

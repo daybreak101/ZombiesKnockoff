@@ -8,7 +8,7 @@ import main.Handler;
 public class IceShotgun extends Gun {
 	public IceShotgun(Handler handler) {
 		// change values
-		super(handler, 0, 100, 140, 5, 10, 0.5f, 7);
+		super(handler, 0, 100, 140, 5, 10, 0.5f, 15);
 		this.name = "Teeth of the Yeti";
 		originalName = name;
 		upgradedName = "Wings of Pamola";

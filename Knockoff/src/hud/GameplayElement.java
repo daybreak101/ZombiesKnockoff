@@ -3,6 +3,7 @@ package hud;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
@@ -11,6 +12,7 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import entities.creatures.Player;
@@ -29,6 +31,7 @@ public class GameplayElement extends HudElement {
 	private Perk[] perks;
 	private Gun gun;// = handler.getWorld().getEntityManager().getPlayer().getInv().getGun();
 	private Color hudColor;
+	private float blessingMeter;
 
 	public GameplayElement(Handler handler) {
 		super(0, 0, 0, 0, handler);
@@ -36,6 +39,7 @@ public class GameplayElement extends HudElement {
 		grenades = 0;
 		round = 0;
 		zombiesLeft = 0;
+		blessingMeter = 0;
 	}
 
 	@Override
@@ -74,8 +78,8 @@ public class GameplayElement extends HudElement {
 
 		perks = player.getInv().getPerks();
 		points = player.getInv().getPoints();
-		currentStamina = player.getCurrentStamina();
-		maxStamina = player.getMaxStamina();
+		currentStamina = player.getPlayerSprint().getCurrentStamina();
+		maxStamina = player.getPlayerSprint().getMaxStamina();
 		round = handler.getRoundLogic().getCurrentRound();
 		zombiesLeft = handler.getRoundLogic().getZombiesLeft();
 		armor = handler.getPlayer().getArmor();
@@ -86,6 +90,7 @@ public class GameplayElement extends HudElement {
 		else
 			gunText = gun.getName() + "         " + gun.getCurrentClip() + " / " + gun.getCurrentReserve();
 
+		blessingMeter = player.getInv().getBlessings().getBlessingMeter();
 	}
 
 	public void renderGrenades(Graphics g) {
@@ -98,6 +103,13 @@ public class GameplayElement extends HudElement {
 		for (int i = 0; i < grenades; i++) {
 			g.fillOval((int) (handler.getWidth() - 300 + i * 25), (int) (handler.getHeight() - 80), 20, 20);
 		}
+		
+		if(handler.getPlayer().getInv().getSpecialGrenadeType() != -1) {
+			for (int i = 0; i < handler.getPlayer().getInv().getSpecialGrenadeAmt() ; i++) {
+				g.fillOval((int) (handler.getWidth() - 300 + i * 25), (int) (handler.getHeight() - 50), 20, 20);
+			}
+		}
+		
 	}
 
 	public void renderGun(Graphics g) {
@@ -109,9 +121,9 @@ public class GameplayElement extends HudElement {
 
 		} else if (gun.getIsReloading()) {
 			g.setColor(Color.black);
-			g.fillRect((int) handler.getWidth() - 300, (int) handler.getHeight() - 100, 100, 10);
+			g.fillRect((int) handler.getWidth() - 300, (int) handler.getHeight() - 95, 100, 10);
 			g.setColor(hudColor);
-			g.fillRect((int) handler.getWidth() - 300, (int) handler.getHeight() - 100,
+			g.fillRect((int) handler.getWidth() - 300, (int) handler.getHeight() - 95,
 					(int) (gun.getReloadProgress() * 100), 10);
 		}
 	}
@@ -120,15 +132,30 @@ public class GameplayElement extends HudElement {
 		// render health
 
 		g.setColor(new Color(128, 0, 0));
-		if (handler.getPlayer().getInv().isJugg()) {
-			g.fillRect((int) 100, (int) handler.getHeight() - 100, 150, 50);
+		if (handler.getPlayer().getInv().getJugg() == 0) {
+			g.fillRect((int) 100, (int) handler.getHeight() - 100, 110, 50);
 
-		} else {
+		} 
+		else if (handler.getPlayer().getInv().getJugg() == 1) {
+			g.fillRect((int) 100, (int) handler.getHeight() - 100, 125, 50);
+		}
+		else if (handler.getPlayer().getInv().getJugg() == 2) {
+			g.fillRect((int) 100, (int) handler.getHeight() - 100, 150, 50);
+		}
+		else if (handler.getPlayer().getInv().getJugg() == 3) {
+			g.fillRect((int) 100, (int) handler.getHeight() - 100, 200, 50);
+		}
+		else {
 			g.fillRect((int) 100, (int) handler.getHeight() - 100, 100, 50);
 		}
 		g.setColor(hudColor);
 		g.fillRect((int) 100, (int) handler.getHeight() - 100, health, 50);
+		
+		g.setColor(new Color(220, 0, 0));
+		g.fillRect((int) 100 + health, (int) handler.getHeight() - 100, handler.getPlayer().getTempHealth(), 50);
 
+		g.drawString(Integer.toString(health + handler.getPlayer().getTempHealth()), 100, (int) handler.getHeight() - 100);
+		
 		g.setColor(Color.BLUE);
 		g.fillRect((int) 100, (int) handler.getHeight() - 60, armor, 10);
 
@@ -152,9 +179,14 @@ public class GameplayElement extends HudElement {
 
 	public void renderInteractionText(Graphics g) {
 		// render interact
-		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 20));
 		g.setColor(hudColor);
-		g.drawString(interactText, (int) handler.getWidth() / 2 - 190, (int) handler.getHeight() / 2 + 200);
+		
+		Rectangle rect = new Rectangle((int) handler.getWidth() / 2 - 210, (int) handler.getHeight() / 2 + 150, 420, 50);
+		g.setColor(Color.black);
+		g.fillRect(rect.x, rect.y, rect.width, rect.height);
+		g.setColor(hudColor);
+		Utils.drawCenteredString(g, interactText, rect, new Font(Font.DIALOG, Font.PLAIN, 20));
+		
 
 	}
 
@@ -162,9 +194,12 @@ public class GameplayElement extends HudElement {
 		// render perks
 		if (perks != null)
 			for (int i = 0; i < perks.length; i++)
-				if (perks[i] != null)
-					g.drawImage(perks[i].getIcon(), (int) (80 + (i * 60)), (int) handler.getHeight() - 200, 50, 50,
+				if (perks[i] != null) {
+					g.drawImage(perks[i].getIcon(), (int) (50 + (i * 60)), (int) handler.getHeight() - 200, 50, 50,
 							null);
+					if(perks[i].getLevel() != 0)
+						g.drawString(Integer.toString(perks[i].getLevel()), (int) (90 + (i * 60)), (int) handler.getHeight() - 150);
+				}
 	}
 
 	public void renderPoints(Graphics g) {
@@ -255,7 +290,20 @@ public class GameplayElement extends HudElement {
 		int j = 0;
 		for (int i = 0; i < powerups.size(); i++) {
 			if (powerups.get(i).isPickedUp() && powerups.get(i).getIcon() != null) {
-				g.drawImage(powerups.get(i).getIcon(), xs[j], powerupY, square, square, null);
+				//g.drawImage(powerups.get(i).getIcon(), xs[j], powerupY, square, square, null);
+				BufferedImage image = powerups.get(i).getIcon();
+	            for (int k = 0; k < image.getWidth(); k++) {
+	                for (int l = 0; l < image.getHeight(); l++) {
+	                	if(image.getRGB(k, l) != new Color(0,0,0).getRGB() && image.getRGB(k, l) != new Color(0,0,0,0).getRGB() ) {
+	                		image.setRGB(k, l, handler.getSettings().getHudColor().getRGB());
+	                	}
+	                    
+	                }
+	            }
+	            if(j < 4)
+	            	g.drawImage(image, xs[j], powerupY, square, square, null);
+				
+				
 				j++;
 			}
 		}
@@ -264,8 +312,10 @@ public class GameplayElement extends HudElement {
 	public void renderRound(Graphics g) {
 		// render round
 		g.drawImage(Assets.zombieBlood, (int) 20, (int) 25, 100, 100, null);
-		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 60));
-		g.drawString(Integer.toString(round), (int) 50, (int) 100);
+		
+		Rectangle rect = new Rectangle(20, 25, 100, 100);
+		g.setColor(hudColor);
+		Utils.drawCenteredString(g, Integer.toString(round), rect, new Font(Font.DIALOG, Font.PLAIN, 60));
 	}
 
 	public void renderStamina(Graphics g) {
@@ -283,6 +333,37 @@ public class GameplayElement extends HudElement {
 		g.setFont(new Font(Font.DIALOG, Font.PLAIN, 20));
 		g.drawString("Zombies Left: " + Integer.toString(zombiesLeft), (int) handler.getWidth() - 200, (int) 300);
 	}
+	
+	public void renderBlessingMeter(Graphics g) {
+		g.setColor(Color.black);
+		g.fillRect(handler.getWidth() - 100, handler.getHeight() - 270, 20, 100);
+		g.setColor(hudColor);
+		g.fillRect(handler.getWidth() - 100, (int) (handler.getHeight() - 170 - (float) (100 * blessingMeter)), 20, (int) (float) (100 * blessingMeter));
+		//g.drawString(handler.getPlayer().getInv().getBlessings().getBlessing(), handler.getWidth() - 177, handler.getHeight() - 300);
+		
+		Rectangle rect = new Rectangle(handler.getWidth() - 200, handler.getHeight() - 320, 200, 50);
+		g.setColor(Color.black);
+		//g.fillRect(rect.x, rect.y, rect.width, rect.height);
+		g.setColor(hudColor);
+		Utils.drawCenteredString(g, handler.getPlayer().getInv().getBlessings().getBlessing(), rect, new Font(Font.DIALOG, Font.PLAIN, 20));
+		
+		if(blessingMeter == 1) {
+			//g.setColor(Color.black);
+			Graphics2D g2d = (Graphics2D) g;
+			g.setColor(Color.black);
+			g2d.fillRoundRect(handler.getWidth() - 105, (int) (handler.getHeight() - 170), 30, 30, 10, 10);
+			g.setColor(hudColor);
+			g2d.drawRoundRect(handler.getWidth() - 105, (int) (handler.getHeight() - 170), 30, 30, 10, 10);
+			g.drawString("X", handler.getWidth() - 97, handler.getHeight() - 148);
+		}
+	
+	}
+	
+	public void renderFPS(Graphics g) {
+		g.drawString(Integer.toString(handler.getGame().getFPS()), handler.getWidth() - 100, 50);
+		g.drawString(Integer.toString(handler.getWorld().getEntityManager().numOfEntities()), handler.getWidth() - 100, 100);
+		
+	}
 
 	@Override
 	public void render(Graphics g) {
@@ -297,6 +378,8 @@ public class GameplayElement extends HudElement {
 		renderStamina(g);
 		if (handler.getSettings().isZombieCounter())
 			renderZombiesLeft(g);
+		renderBlessingMeter(g);
+		renderFPS(g);
 
 		Point2D center = new Point2D.Float(500, 500);
 		float radius = 250;

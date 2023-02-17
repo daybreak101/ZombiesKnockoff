@@ -43,7 +43,7 @@ public class Toxen extends Zombie {
 		g.drawImage(Assets.shadow, (int) (x - handler.getGameCamera().getxOffset()),
 				(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
 
-		if(isBurning) {
+		if(burnStatus.isBurning()) {
 			g.setColor(Color.orange);
 			g.fillOval((int) (x - handler.getGameCamera().getxOffset()),
 				(int) (y - handler.getGameCamera().getyOffset()), width, height);
@@ -63,10 +63,22 @@ public class Toxen extends Zombie {
 
 	@Override
 	public void die() {
-		if(handler.getPlayer().getInv().isVamp())
-			handler.getPlayer().incrementHealth();
-		
-		if(isBurning) {
+		if(handler.getPlayer().getInv().getVamp() >= 1) {
+			handler.getPlayer().incrementTempHealth(5);
+		}
+		else if (handler.getPlayer().getInv().getVamp() >= 0) {
+			handler.getPlayer().incrementTempHealth(1);
+		}
+		if(handler.getPlayer().getInv().getStronghold() == 3) {
+			if(handler.getPlayer().getStrongholdRadius() != null) {
+				if(handler.getPlayer().getStrongholdRadius().intersects(getHitBox(0,0))) {
+					handler.getPlayer().gainArmor(5);
+					handler.getPlayer().gainStrongholdDamageMultiplier(.05f);
+				}
+			}
+		}
+		handler.getPlayer().getStats().gainKill();
+		if(burnStatus.isBurning()) {
 			new Grenade(handler, x + width/2, y + height/2, new Color(144, 238, 144)).findEntitiesInRadius();
 		}
 		else

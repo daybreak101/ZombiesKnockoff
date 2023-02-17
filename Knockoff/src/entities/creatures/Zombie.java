@@ -5,155 +5,152 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import entities.Entity;
-import entities.areas.Areas;
 import entities.blood.Blood;
-import entities.bullets.SniperBullet;
+import entities.creatures.zombieinfo.BurnStatus;
+import entities.creatures.zombieinfo.FreezeStatus;
+import entities.creatures.zombieinfo.SlownessStatus;
 import entities.powerups.MaxAmmo;
 import entities.statics.Barrier;
 import entities.statics.InteractableStaticEntity;
-import entities.statics.traps.IcyWater;
+import entities.statics.Wall;
 import graphics.Animation;
 import graphics.Assets;
 import hud.CritElement;
 import hud.DamageElement;
 import hud.ZombieHealthElement;
 import main.Handler;
-import utils.Graph;
 import utils.Node;
+import utils.Timer;
 
 public class Zombie extends Creature {
 
 	protected Animation zombieAnim, zombieAttackAnim, crawlerAnim, crawlerAttackAnim, enhancedZombieAnim,
 			enhancedZombieAttackAnim;
 	protected boolean justAttacked = false;
-	protected long timer = 0;
-	protected int attackTicker = 0, attackTimer = 100;
 	private int attackDamage;
-	Random rand = new Random();
+	protected Random rand = new Random();
 	private float angley = rand.nextInt(handler.getWorld().getHeight() * 100),
 			anglex = rand.nextInt(handler.getWorld().getWidth() * 100);
-	Graph graph;
 	Node goTo = null;
 	private int source, player;
-	boolean moving = false;
-
-	private SniperBullet sniperBullet;
-
-	// flamethrower vars
-	protected boolean isBurning = false;
-	private int burnDamage = 0;
-	private int burnTicker = 0;
-	private int burnMax = 300;
-
+	boolean moving = false;	
+	
 	protected int zombieType;
 	protected boolean isCrawler = false;
-	protected boolean isFrozen = false;
 
 	protected int maxHealth;
+
+	protected BurnStatus burnStatus;
+	protected FreezeStatus freezeStatus;
+	protected SlownessStatus slownessStatus;
+	
+	protected Timer attackCooldown = new Timer(100);
+
+
 
 	protected Rectangle hitbox;
 	protected ZombieHealthElement healthBar;
 
-	public Zombie(Handler handler, float x, float y, float dspeed, int health) {
+	public Zombie(Handler handler, float x, float y, float dSpeed, int health) {
 		super(handler, x, y, Creature.DEFAULT_CREATURE_WIDTH, Creature.DEFAULT_CREATURE_HEIGHT);
-		isZombie = true;
 		zombieType = ZOMBIE;
 		zombieAnim = new Animation(150, Assets.zombieAnim);
 		zombieAttackAnim = new Animation(100, Assets.zombieAttackAnim, true);
 		crawlerAnim = new Animation(100, Assets.crawlerAnim);
-		speed = 1.8f + dspeed;
+		dSpeed = rand.nextFloat(dSpeed - .3f, dSpeed + .4f);
+		speed = 1.8f + dSpeed;
 		attackDamage = 10;
 		this.health = health;
 		maxHealth = health;
 		hitbox = new Rectangle(0, 0, width, height);
-		//bounds.x = 0;
-		//bounds.y = 0;
-		//bounds.width = 0;
-		//bounds.height = 0 ;
-		bounds.x = 65 / 2;
-		bounds.y = 65 / 2;
-		bounds.width = 10;
-		bounds.height = 10;
-		graph = handler.getWorld().getGraph();
+		bounds = new Rectangle(25, 25, 25, 25);
 		healthBar = new ZombieHealthElement(handler, x, y, this);
+
+		burnStatus = new BurnStatus(this);
+		freezeStatus = new FreezeStatus(handler, this);
+		slownessStatus = new SlownessStatus(this);
 	}
 
 	public void setSpeed(float dSpeed) {
+		rand = new Random();
+		dSpeed = rand.nextFloat(dSpeed - .3f, dSpeed + .4f);
 		speed = 1.8f + dSpeed;
 	}
-
-	int movementType = 0;
-	int moveCounter = 0;
-	int moveTimer = 60;
-
-	float slowdown = 1;
-	boolean inWater = false;
+	
+	public void removeSpeed() {
+		speed = 0;
+	}
 
 	@Override
 	public void tick() {
-		checkIfInIcyWater();
-		if (isFrozen) {
+		freezeStatus.checkIfInIcyWater();
+		if (freezeStatus.isFrozen()) {
 
-		} else if (handler.getPlayer().getHealth() <= 0) {
+		} else if (handler.getPlayer().getHealth() <= 0 || (handler.getPlayer().getInv().getBlessings().isRunning()
+				&& handler.getPlayer().getInv().getBlessings().getBlessing() == "In Plain Sight")) {
 			meander();
 			move();
 		} else {
-
-			slowdown = 1;
-			if (inWater) {
-				slowdown += .5;
+			slownessStatus.setSlowness(1);
+			if (freezeStatus.inWater()) {
+				slownessStatus.addToSlowness(.5f);
 			}
 
-			if (checkForObstacles()) {
-				movementType = 1;
+			if (justAttacked) {
+				attackCooldown.tick();
+				if (attackCooldown.isReady()) {
+					zombieAttackAnim.resetAnim();
+					justAttacked = false;
+					attackCooldown.resetTimer();
+				}
+			} else if (checkForObstacles()) {
 				followPath();
-			} 
-			else if (goTo != null) {
+			} else if (goTo != null) {
 				if (source != goTo.getVertex()) {
-
 					followPath();
+				} else {
+					followPlayer();
 				}
-				else {
-				//movementType = 0;
-				//moveCounter = 0;
-				//moving = false;
-				followPlayer();
-			
-				}
-			}
-			else {
+			} else {
 				followPlayer();
 			}
 
-		burn();
-		attack();
-		postTick();
-		healthBar.tick();
+			burnStatus.burn();
+			attack();
+			postTick();
+			healthBar.tick();
 		}
 
 	}
 
+	Timer attacking = new Timer(20);
+	boolean isAttacking = false;
+
 	public void attack() {
 		Rectangle playerBox = handler.getPlayer().getHitbox();
-		if (this.getHitBox(0, 0).intersects(playerBox)) {
-			if (isFrozen) {
 
-			} else if (!justAttacked() && !handler.getPlayer().getJustTookDamage()) {
-				handler.getPlayer().takeDamage(attackDamage);
+		if (isAttacking) {
+			attacking.tick();
+			if (attacking.isReady()) {
+				if (this.getHitBox(0, 0).intersects(playerBox) && !handler.getPlayer().getJustTookDamage()) {
+					handler.getPlayer().takeDamage(attackDamage);
+					handler.getPlayer().justTookDamage();
+				}
 				dontMove();
-				handler.getPlayer().justTookDamage();
+				attacking.resetTimer();
+				isAttacking = false;
 			}
+		} else if (this.getHitBox(0, 0).intersects(playerBox) && !justAttacked()) {
+			isAttacking = true;
 		} else {
 			for (Barrier e : handler.getWorld().getEntityManager().getBarriers()) {
 				if (e.getCollisionBounds(0, 0).intersects(this.getHitBox(0, 0))) {
-					if (isFrozen) {
-
-					} else if (justAttacked() == false) {
+					if (justAttacked() == false) {
 						e.takeDamage(attackDamage);
 						dontMove();
 					}
@@ -172,17 +169,22 @@ public class Zombie extends Creature {
 		this.speed = 1.0f;
 	}
 
-	public void checkIfInIcyWater() {
-		boolean found = false;
-		for (Areas e : handler.getWorld().getEntityManager().getAreas()) {
-			if (((IcyWater) e).checkIfEntityIsContained(getHitBox(0, 0))) {
-				inWater = true;
-				found = true;
-			}
+	public boolean isCritical() {
+		if (handler.getPlayer().getInv().getBlessings().getBlessing() == "So No Head?"
+				&& handler.getPlayer().getInv().getBlessings().isRunning())
+			return true;
+
+		int criticalChance = rand.nextInt(100);
+
+		if (handler.getPlayer().getInv().getDeadshot() >= 2) {
+			if (criticalChance < 20)
+				return true;
+		} else {
+			if (criticalChance < 10)
+				return true;
 		}
-		if (!found) {
-			inWater = false;
-		}
+
+		return false;
 	}
 
 	public void takeDamage(int amount) {
@@ -194,94 +196,44 @@ public class Zombie extends Creature {
 
 		} else {
 			crit = isCritical();
-			if (crit && handler.getPlayer().getInv().isDeadshot()) {
-				health -= (amount * 3);
-				if (handler.getSettings().isToggleDamage())
-					handler.getHud()
-							.addObject(new DamageElement(handler, x + width / 2 + 10, y + height / 2 + 10, amount * 3));
-				if (handler.getSettings().isToggleCrits())
-					handler.getHud().addObject(new CritElement(handler, x + width / 2, y + height / 2));
-				System.out.println("critical");
-			} else if (crit) {
-				health -= (amount * 2);
-				if (handler.getSettings().isToggleDamage())
-					handler.getHud()
-							.addObject(new DamageElement(handler, x + width / 2 + 10, y + height / 2 + 10, amount * 2));
-				if (handler.getSettings().isToggleCrits())
-					handler.getHud().addObject(new CritElement(handler, x + width / 2, y + height / 2));
-				System.out.println("critical");
-			} else {
-				if (handler.getSettings().isToggleDamage())
-					handler.getHud()
-							.addObject(new DamageElement(handler, x + width / 2 + 10, y + height / 2 + 10, amount));
-				health -= amount;
-			}
+			if (crit && handler.getPlayer().getInv().getDeadshot() == 3)
+				amount = (amount * 3);
+			else if (crit)
+				amount = (amount * 2);
+			if (handler.getSettings().isToggleCrits() && crit)
+				handler.getHud().addObject(new CritElement(handler, x + width / 2, y + height / 2));
+			if (handler.getSettings().isToggleDamage())
+				handler.getHud().addObject(new DamageElement(handler, x + width / 2 + 10, y + height / 2 + 10, amount));
+			health -= amount;
 		}
-		if (isFrozen) {
-			freezeNearbyZombies();
+		if (freezeStatus.isFrozen()) {
+			freezeStatus.freezeNearbyZombies();
 			active = false;
 			die();
-		} else if (health <= 0 && inWater) {
-			freeze();
+		} else if (health <= 0 && freezeStatus.inWater()) {
+			freezeStatus.freeze();
 		} else if (health <= 0 && active == true) {
 			if (crit) {
-				handler.getPlayer().gainPoints(100);
+				if (handler.getPlayer().getInv().getDeadshot() >= 1)
+					handler.getPlayer().getInv().gainPoints(150);
+				else
+					handler.getPlayer().getInv().gainPoints(100);
 				handler.getPlayer().getStats().addHeadshot();
 			} else {
-				handler.getPlayer().gainPoints(70);
+				handler.getPlayer().getInv().gainPoints(70);
 			}
 
 			active = false;
 			die();
 		} else {
-			handler.getPlayer().gainPoints(10);
-		}
-	}
-
-	public void freezeNearbyZombies() {
-		Ellipse2D freezeRadius = new Ellipse2D.Float(x + width / 2 - 100, y + height / 2 - 100, 200, 200);
-		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
-			if (freezeRadius.intersects(e.getHitBox(0, 0)) && e != this) {
-				e.freeze();
-			}
-		}
-	}
-
-	public void freeze() {
-		if ((zombieType != ZombieType.ICE_ENHANCED_ZOMBIE || zombieType != ZombieType.WHITE_WALKER)) {
-			if (isFrozen) {
-				active = false;
-				die();
-			} else {
-				isFrozen = true;
-				speed = 0;
-				health = 1;
-			}
-		}
-
-	}
-
-	int eachBurnTicker = 0, eachBurnMax = 20;
-
-	public void burn() {
-		if (isBurning) {
-			burnTicker++;
-			eachBurnTicker++;
-			if (eachBurnTicker >= eachBurnMax) {
-				takeDamage(burnDamage);
-				eachBurnTicker = 0;
-			}
-			if (burnTicker >= burnMax) {
-				isBurning = false;
-				burnTicker = 0;
-			}
+			handler.getPlayer().getInv().gainPoints(10);
 		}
 	}
 
 	public void postTick() {
-		if (!justAttacked && !isFrozen)
+		if (!justAttacked && !freezeStatus.isFrozen())
 			zombieAnim.tick();
-		else if (justAttacked && !isFrozen) {
+		else if (justAttacked && !freezeStatus.isFrozen()) {
 			zombieAttackAnim.tick();
 		}
 
@@ -289,12 +241,6 @@ public class Zombie extends Creature {
 
 	public void dontMove() {
 		justAttacked = true;
-	}
-
-	public void setBurn(int damage) {
-		isBurning = true;
-		burnTicker = 0;
-		burnDamage = damage;
 	}
 
 	public void meander() {
@@ -305,8 +251,8 @@ public class Zombie extends Creature {
 		float moveToY = angley - y;
 
 		float angle = (float) Math.atan2(moveToY, moveToX);
-		xMove = (float) (speed * Math.cos(angle) / slowdown);
-		yMove = (float) (speed * Math.sin(angle) / slowdown);
+		xMove = (float) (speed * Math.cos(angle) / slownessStatus.getSlowness());
+		yMove = (float) (speed * Math.sin(angle) / slownessStatus.getSlowness());
 
 		if (5 >= moveToX && 0 <= moveToX) {
 			anglex = rand.nextInt(handler.getWorld().getWidth() * 100);
@@ -325,95 +271,52 @@ public class Zombie extends Creature {
 		y += yMove;
 	}
 
-	Line2D[] z2p = new Line2D[9];
+	Line2D z2p;
 	boolean intersection = false;
 
 	public boolean checkForObstacles() {
 		Player player = handler.getPlayer();
-		z2p[0] = new Line2D.Float(x + width/2, y + height/2, player.getX() + 2, player.getY() + 2);
-		z2p[1] = new Line2D.Float(x + width/2, y + height/2, player.getX() + 2, player.getY() + player.getHeight() / 2);
-		z2p[2] = new Line2D.Float(x + width/2, y + height/2, player.getX() + 2, player.getY() + player.getHeight() - 2);
-		z2p[3] = new Line2D.Float(x + width/2, y + height/2, player.getX() + player.getWidth() / 2, player.getY() + 2);
-		z2p[4] = new Line2D.Float(x + width/2, y + height/2, player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2);
-		z2p[5] = new Line2D.Float(x + width/2, y + height/2, player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() - 2);
-		z2p[6] = new Line2D.Float(x + width/2, y + height/2, player.getX() + player.getWidth() - 2, player.getY() + 2);
-		z2p[7] = new Line2D.Float(x + width/2, y + height/2, player.getX() + player.getWidth() - 2, player.getY() + player.getHeight() / 2);
-		z2p[8] = new Line2D.Float(x + width/2, y + height/2, player.getX() + player.getWidth() - 2, player.getY() + player.getHeight() - 2);
-
+		z2p = new Line2D.Float(x + width / 2, y + height / 2, player.getCenterX(), player.getCenterY());
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			for (int i = 0; i < 9; i++) {
-				if (z2p[i].intersects(e.getCollisionBounds(0, 0))) {
-					if (!handler.getWorld().getEntityManager().getBarriers().contains(e)) {
-						return true;
-					}
-
-				}
-			}
+			if (z2p.intersects(e.getCollisionBounds(0, 0)))
+				if (!handler.getWorld().getEntityManager().getBarriers().contains(e))
+					return true;
+		}
+		for (Wall e : handler.getWorld().getEntityManager().getWalls()) {
+			if (z2p.intersects(e.getCollisionBounds(0, 0)))
+				return true;
 		}
 		return false;
 	}
 
-	int lastPlayer, lastSource;
-	float xOffset, yOffset;
-
 	public void followPath() {
+		source = handler.getWorld().getClosestNode(getCenterX(), getCenterY());
+		player = handler.getPlayer().getClosestNode();
+		goTo = handler.getWorld().getNextStep(source, player);
 
-		if (justAttacked) {
-			timer++;
-			if (timer == 100) {
-				zombieAttackAnim.resetAnim();
-				justAttacked = false;
-				timer = 0;
-			}
-		} else {
-
-			//if(source == -1)
-				source = handler.getWorld().getClosestNode(x + width / 2, y + height / 2);
-
-			player = handler.getWorld().getClosestNode(handler.getPlayer().getX() + handler.getPlayer().getWidth() / 2,
-					handler.getPlayer().getY() + handler.getPlayer().getHeight() / 2);
-
-			
+		if (handler.getWorld().getNodes().get(source).checkWithinNode(this)) {
+			source = goTo.getVertex();
 			goTo = handler.getWorld().getNextStep(source, player);
-			//if (goTo != null)
-				//System.out.println("source: " + source + " , goTo: " + goTo.getVertex() + " , player: " + player);
+		}
+		if (goTo == null) {
+			meander();
+			move();
+		} else if (source == goTo.getVertex() && goTo.checkWithinNode(this)) {
+			meander();
+			move();
+		} else {
+			float moveToX = goTo.getX() - getCenterX();
+			float moveToY = goTo.getY() - getCenterY();
+			float angle = (float) Math.toDegrees(Math.atan2(moveToY, moveToX));
 
-	
-			
-			
-			if (handler.getWorld().getNodes().get(source).checkWithinNode(this)) {
-				System.out.println("source: " + source + " , goTo: " + goTo.getVertex() + " , player: " + player);
-				source = goTo.getVertex();
-				goTo = handler.getWorld().getNextStep(source, player);
-			}
-			if (goTo == null) {
-				meander();
-				move();
-			}else if(source == goTo.getVertex() && goTo.checkWithinNode(this)) {
-				//System.out.print("okay");
-				meander();
-				move();
-			} else {
+			xMove = (float) (speed * (float) Math.cos(Math.toRadians(angle)) / slownessStatus.getSlowness());
+			yMove = (float) (speed * (float) Math.sin(Math.toRadians(angle)) / slownessStatus.getSlowness());
 
-				float moveToX = goTo.getX() - x - width / 2;
-				float moveToY = goTo.getY() - y - height / 2;
+			if (!checkEntityCollisions(xMove, 0f))
+				moveX();
+			if (!checkEntityCollisions(0f, yMove))
+				moveY();
 
-				float angle = (float) Math.toDegrees(Math.atan2(moveToY, moveToX));
-				xMove = (float) (speed * (float) Math.cos(Math.toRadians(angle)) / slowdown);
-				yMove = (float) (speed * (float) Math.sin(Math.toRadians(angle)) / slowdown);
-
-				// System.out.println("xMove: " + xMove + " , yMove: " + yMove);
-
-				if (!checkEntityCollisions(xMove, 0f)) {
-					moveX();
-				}
-
-				if (!checkEntityCollisions(0f, yMove)) {
-
-					moveY();
-				}
-
-			}
 		}
 	}
 
@@ -425,30 +328,17 @@ public class Zombie extends Creature {
 		xMove = 0;
 		yMove = 0;
 
-		if (justAttacked == true) {
-			timer++;
-			if (timer == 100) {
-				zombieAttackAnim.resetAnim();
-				justAttacked = false;
-				timer = 0;
-			}
-		} else {
-			float moveToX = handler.getPlayer().getX() - x;
-			float moveToY = handler.getPlayer().getY() - y;
+		float moveToX = handler.getPlayer().getX() - x;
+		float moveToY = handler.getPlayer().getY() - y;
 
-			float angle = (float) Math.toDegrees(Math.atan2(moveToY, moveToX));
-			xMove = (float) (speed * (float) Math.cos(Math.toRadians(angle)) / slowdown);
-			yMove = (float) (speed * (float) Math.sin(Math.toRadians(angle)) / slowdown);
+		float angle = (float) Math.toDegrees(Math.atan2(moveToY, moveToX));
+		xMove = (float) (speed * (float) Math.cos(Math.toRadians(angle)) / slownessStatus.getSlowness());
+		yMove = (float) (speed * (float) Math.sin(Math.toRadians(angle)) / slownessStatus.getSlowness());
 
-			if (!checkEntityCollisions(xMove, 0f)) {
-				moveX();
-			}
-
-			if (!checkEntityCollisions(0f, yMove)) {
-
-				moveY();
-			}
-		}
+		if (!checkEntityCollisions(xMove, 0f))
+			moveX();
+		if (!checkEntityCollisions(0f, yMove))
+			moveY();
 	}
 
 	float rotationAngle;
@@ -456,53 +346,41 @@ public class Zombie extends Creature {
 	@Override
 	public void render(Graphics g) {
 		float moveToX, moveToY;
-		if (!isFrozen && handler.getPlayer().getHealth() <= 0) {
-			moveToX = x - anglex; // - handler.getGameCamera().getxOffset();
-			moveToY = y - angley;// - handler.getGameCamera().getyOffset();;
 
-			rotationAngle = (float) Math.toDegrees(Math.atan2(-moveToX + width / 2, moveToY + height / 2));
-		} else if (!isFrozen && !justAttacked) {
+		if (xMove == 0 && yMove == 0) {
 
-			moveToX = handler.getPlayer().getX() - handler.getGameCamera().getxOffset()
-					+ handler.getPlayer().getWidth() / 2;
-			moveToY = handler.getPlayer().getY() - handler.getGameCamera().getyOffset()
-					+ handler.getPlayer().getHeight() / 2;
-			rotationAngle = (float) Math
-					.toDegrees(Math.atan2(-(x - handler.getGameCamera().getxOffset() - moveToX + width / 2),
-							y - handler.getGameCamera().getyOffset() - moveToY + height / 2));
-
+		} else if (!freezeStatus.isFrozen()) {
+			moveToX = x - (x + xMove);
+			moveToY = y - (y + yMove);
+			rotationAngle = (float) Math.toDegrees(Math.atan2(-moveToX, moveToY));
 		}
-
 		if (!isCrawler)
-			g.drawImage(Assets.shadow, (int) (x - handler.getGameCamera().getxOffset()),
-					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
+			g.drawImage(Assets.shadow, (int) (getRenderX()), (int) (getRenderY()), width, height, null);
 
-		if (isBurning) {
+		if (burnStatus.isBurning()) {
 			g.setColor(Color.orange);
-			g.fillOval((int) (x - handler.getGameCamera().getxOffset()),
-					(int) (y - handler.getGameCamera().getyOffset()), width, height);
+			g.fillOval((int) (getRenderX()), (int) (getRenderY()), width, height);
 		}
 
 		Graphics2D g2d = (Graphics2D) g;
 		AffineTransform old = g2d.getTransform();
-		g2d.rotate(Math.toRadians(rotationAngle), x - handler.getGameCamera().getxOffset() + width / 2,
-				y - handler.getGameCamera().getyOffset() + height / 2);
+		g2d.rotate(Math.toRadians(rotationAngle), getRenderX() + width / 2,
+				getRenderY() + height / 2);
 
-		if (isFrozen) {
-			g2d.drawImage(Assets.frozenZombie, (int) (x - handler.getGameCamera().getxOffset()),
-					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
-		} else if (isCrawler) {
-			g2d.drawImage(Assets.crawler, (int) (x - (height * 1.5 / 2) - handler.getGameCamera().getxOffset()),
-					(int) (y - (width * 1.5 / 2) - handler.getGameCamera().getyOffset()), (int) (width * 1.5),
-					(int) (height * 1.5), null);
-		} else if (justAttacked) {
-			g2d.drawImage(zombieAttackAnim.getCurrentFrame(), (int) (x - handler.getGameCamera().getxOffset()),
-					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
-		} else {
-			g2d.drawImage(zombieAnim.getCurrentFrame(), (int) (x - handler.getGameCamera().getxOffset()),
-					(int) (y - handler.getGameCamera().getyOffset()), width, height, null);
-		}
+		BufferedImage currentImage = Assets.crawler;
+		if (freezeStatus.isFrozen())
+			currentImage = Assets.frozenZombie;
+		 else if (isCrawler) 
+			g2d.drawImage(Assets.crawler, (int) (x - (height * 1.25 / 2) - handler.getGameCamera().getxOffset()),
+					(int) (y - (width * 1.25 / 2) - handler.getGameCamera().getyOffset()), (int) (width * 1.25),
+					(int) (height * 1.25), null);
+		 else if (justAttacked)
+			currentImage = zombieAttackAnim.getCurrentFrame();
+		 else
+			currentImage = zombieAnim.getCurrentFrame();
 
+		if(!isCrawler)
+			g2d.drawImage(currentImage, (int) (getRenderX()), (int) (getRenderY()), width, height, null);
 		g2d.setTransform(old);
 
 		if (handler.getSettings().isHealthBar())
@@ -512,18 +390,30 @@ public class Zombie extends Creature {
 
 	@Override
 	public void die() {
-		if (handler.getPlayer().getInv().isVamp())
-			handler.getPlayer().incrementHealth();
+		if (handler.getPlayer().getInv().getVamp() >= 0)
+			handler.getPlayer().incrementTempHealth(1);
+		if (handler.getPlayer().getInv().getStronghold() == 3) {
+			if (handler.getPlayer().getStrongholdRadius() != null) {
+				if (handler.getPlayer().getStrongholdRadius().intersects(getHitBox(0, 0))) {
+					handler.getPlayer().gainArmor(5);
+					handler.getPlayer().gainStrongholdDamageMultiplier(.05f);
+				}
+			}
+		}
 
 		handler.getPlayer().getStats().gainKill();
 		handler.getWorld().getEntityManager().addBlood(new Blood(handler, x, y, zombieType));
 
-		if (handler.getRoundLogic().getPowerups().isPowerUpReady()) {
-			handler.getWorld().getEntityManager()
-					.addPowerUp(handler.getRoundLogic().getPowerups().generatePowerUp(x, y));
-		}
-		if (handler.getRoundLogic().getZombiesLeft() <= 1 && handler.getRoundLogic().isDogRound()) {
-			handler.getWorld().getEntityManager().addPowerUp(new MaxAmmo(handler, x, y));
+		int vertex = handler.getWorld().getClosestNode((int) (getCenterX()), (int) (getCenterY()));
+		// Node node = ;
+		if (handler.getWorld().getNodes().get(vertex).withinPlayable()) {
+			if (handler.getRoundLogic().getPowerups().isPowerUpReady()) {
+				handler.getWorld().getEntityManager()
+						.addPowerUp(handler.getRoundLogic().getPowerups().generatePowerUp(x, y));
+			}
+			if (handler.getRoundLogic().getZombiesLeft() <= 1 && handler.getRoundLogic().isDogRound()) {
+				handler.getWorld().getEntityManager().addPowerUp(new MaxAmmo(handler, x, y));
+			}
 		}
 	}
 
@@ -536,17 +426,25 @@ public class Zombie extends Creature {
 		health -= damage;
 		if (health <= 0 && active == true) {
 			handler.getWorld().getEntityManager().addBlood(new Blood(handler, x, y, zombieType));
-
 			active = false;
 		}
 	}
 
 	public boolean checkEntityCollisions(float xOffset, float yOffset) {
 		for (Entity e : handler.getWorld().getEntityManager().getEntities()) {
-			if (e.equals(this) || e.isZombie())
+			if (e.equals(this))
 				continue;
 			if (e.getCollisionBounds(0f, 0f).intersects(getCollisionBounds(xOffset, yOffset)))
 				return true;
+		}
+		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
+			if (e.getCollisionBounds(0f, 0f).intersects(getCollisionBounds(xOffset, yOffset)))
+				return true;
+		}
+		for (Wall e : handler.getWorld().getEntityManager().getWalls()) {
+			if (e.getCollisionBounds(0, 0).intersects(getCollisionBounds(xOffset, yOffset))) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -559,24 +457,19 @@ public class Zombie extends Creature {
 		return attackDamage;
 	}
 
-	public SniperBullet getSniperBullet() {
-		return sniperBullet;
-	}
-
-	public void setSniperBullet(SniperBullet sniperBullet) {
-		this.sniperBullet = sniperBullet;
-	}
-
 	public int getZombieType() {
 		return zombieType;
-	}
-
-	public boolean isFrozen() {
-		return isFrozen;
 	}
 
 	public int getMaxHealth() {
 		return maxHealth;
 	}
 
+	public BurnStatus getBurnStatus() {
+		return burnStatus;
+	}
+
+	public FreezeStatus getFreezeStatus() {
+		return freezeStatus;
+	}
 }

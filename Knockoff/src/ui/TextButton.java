@@ -97,6 +97,13 @@ public class TextButton extends UIObject{
 
 	@Override
 	public void render(Graphics g) {
+		
+		//test
+		//g.setColor(Color.black);
+		//g.fillRect((int) x, (int) y, width, height);
+		///
+		
+		
 		if(r<=0)
 			r = 0;
 		if(r>=255)
@@ -123,6 +130,7 @@ public class TextButton extends UIObject{
 		}
 		if (hovering) {
 			g.setColor(new Color(r, gr, b));
+			
 
 		}
 		else {
@@ -130,6 +138,7 @@ public class TextButton extends UIObject{
 		}
 		g.setFont(new Font(Font.DIALOG, Font.PLAIN, fontSize));
 		g.drawString(text, (int) x + 10, (int) y + height/2 + 10);
+		
 	}
 
 	@Override

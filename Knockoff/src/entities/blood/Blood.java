@@ -38,7 +38,6 @@ public class Blood {
 		this.bloodType = bloodType;
 		
 		if (bloodType == ZombieType.ZOMBIE) {
-			System.out.println("here");
 			bloodImage = Assets.zombieBlood;
 		} else if (bloodType == ZombieType.LICKER) {
 			bloodImage = Assets.lickerBlood;
@@ -64,7 +63,7 @@ public class Blood {
 		Player player = handler.getPlayer();
 		if(rect.intersects(player.getCollisionBounds(0, 0)) && damageTimer.isReady()) {
 			if(bloodType == ZombieType.STOKER) {
-				handler.getPlayer().setBurn(damageToPlayer);
+				handler.getPlayer().getBurnStatus().setBurn(damageToPlayer);
 			}
 			handler.getPlayer().takeDamage(damageToPlayer/2);
 			damageTimer.resetTimer();
@@ -75,7 +74,7 @@ public class Blood {
 		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getCollisionBounds(0, 0).intersects(rect) && e.getZombieType() != bloodType && damageTimer.isReady()) {	
 				if(bloodType == ZombieType.STOKER) {
-					handler.getPlayer().setBurn(damageToZombie/5);
+					handler.getPlayer().getBurnStatus().setBurn(damageToZombie/5);
 				}
 				e.takeDamage(damageToZombie);
 				damageTimer.resetTimer();

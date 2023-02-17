@@ -24,7 +24,7 @@ public class InfiniteAmmo extends PowerUps {
 	@Override
 	public void fulfillInteraction() {
 		handler.getRoundLogic().getPowerups().setInfiniteAmmoActive(true);
-		handler.getWorld().getEntityManager().getPlayer().infiniteAmmo();
+		handler.getWorld().getEntityManager().getPlayer().getInv().infiniteAmmo();
 	}
 
 	@Override

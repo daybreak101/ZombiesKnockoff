@@ -14,6 +14,7 @@ public class MysteryBox extends InteractableStaticEntity {
 	private Gun gun;
 	private int isOpenedTimer, isOpenedTime;
 	private boolean cantAfford = false;
+	private boolean isSpecialGrenade = false;
 
 	public MysteryBox(Handler handler, float x, float y) {
 		super(handler, x, y, 150, 75);
@@ -28,7 +29,7 @@ public class MysteryBox extends InteractableStaticEntity {
 		//spin for weapon
 		if(isOpened == false && cooldownTimer >= cooldown) {
 			
-			if(handler.getPlayer().purchase(950)) {
+			if(handler.getPlayer().getInv().purchase(950)) {
 				isOpened = true;
 				cantAfford = false;
 				cooldownTimer = 0;
@@ -36,7 +37,7 @@ public class MysteryBox extends InteractableStaticEntity {
 				handler.getGlobalStats().addBoxSpin();
 				
 				//don't give a weapon player already has
-				while(handler.getPlayer().checkArsenal(gun)) {
+				while(handler.getPlayer().getInv().checkArsenal(gun)) {
 					gun = getRandomWeapon();
 				}
 			}
@@ -51,7 +52,11 @@ public class MysteryBox extends InteractableStaticEntity {
 			cooldownTimer = 0;
 			isOpened = false;
 			isOpenedTimer = 0;
-			handler.getPlayer().setGun(gun);
+			if(gun.getOriginalName() == "Gas Grenades") {
+				handler.getPlayer().getInv().setSpecialGrenade(0);
+			}
+			else
+				handler.getPlayer().getInv().setGun(gun);
 			handler.getGlobalStats().addBoxPull();
 		}
 		
@@ -59,7 +64,7 @@ public class MysteryBox extends InteractableStaticEntity {
 	
 	public Gun getRandomWeapon() {
 		Random rand = new Random();
-		int rng = rand.nextInt(11);
+		int rng = rand.nextInt(12);
 		
 		switch(rng) {
 		case 1:
@@ -82,6 +87,8 @@ public class MysteryBox extends InteractableStaticEntity {
 			return new Flamethrower(handler);
 		case 10: 
 			return new GrenadeLauncher(handler);
+		case 11:
+			return new GasGrenades(handler);
 		default:
 			return new Glock17(handler);
 		}
@@ -91,7 +98,7 @@ public class MysteryBox extends InteractableStaticEntity {
 	public void postTick() {
 		if(cantAfford == true && cooldownTimer < cooldown) {
 			isOpenedTimer = 0;
-			triggerText = "              Not enough points!";
+			triggerText = "Not enough points!";
 		}	
 		else if(isOpened == true && cooldownTimer >= cooldown) {
 			triggerText = "Press F to trade weapon for " + gun.getName();
@@ -106,7 +113,7 @@ public class MysteryBox extends InteractableStaticEntity {
 			gun = null;
 		}
 		else if(isOpened == true) {
-			triggerText = "            Spinning...";
+			triggerText = "Spinning...";
 		}
 		else {
 			triggerText = "";

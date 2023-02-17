@@ -8,8 +8,8 @@ import utils.Timer;
 
 public class Stronghold extends Perk{
 
-	public Stronghold(Handler handler) {
-		super(handler);
+	public Stronghold(Handler handler, int level) {
+		super(handler, level);
 		this.name = "Stronghold";
 		this.icon = Assets.stronghold;
 	}
@@ -31,7 +31,7 @@ public class Stronghold extends Perk{
 			strengthTick.tick();
 			if(strengthTick.isReady()) {
 				handler.getPlayer().gainArmor(5);
-				handler.getPlayer().gainStrongholdDamageMultiplier(.1f);
+				handler.getPlayer().gainStrongholdDamageMultiplier(.05f);
 			}
 			
 			if(!handler.getPlayer().checkIfInStrongholdCircle()){
@@ -51,13 +51,13 @@ public class Stronghold extends Perk{
 
 	@Override
 	public void buff() {
-		handler.getPlayer().getInv().setStronghold(true);
+		handler.getPlayer().getInv().setStronghold(level);
 		
 	}
 
 	@Override
 	public void debuff() {
-		handler.getPlayer().getInv().setStronghold(false);
+		handler.getPlayer().getInv().setStronghold(-1);
 		handler.getPlayer().getInv().strongholdActivation = false;
 		handler.getPlayer().removeArmor();
 		handler.getPlayer().removeStrongholdDamageMultiplier();

@@ -18,14 +18,14 @@ public class MenuState extends State{
 		uiManager = new UIManager(handler);
 		handler.getMouseManager().setUIManager(uiManager);
 		
-		uiManager.addObject(new TextButton(handler, 300,200,300,100, "Start Game", 50, new ClickListener() {
+		uiManager.addObject(new TextButton(handler, 300,200,300,100, "Play Game", 50, new ClickListener() {
 
 			@Override
 			public void onClick() {
-				handler.getGlobalStats().addGame();
+				//handler.getGlobalStats().addGame();
 				handler.getMouseManager().setUIManager(null);
-				handler.getGame().gameState = new GameState(handler);
-				State.setState(handler.getGame().gameState);
+				//handler.getGame().gameState = new GameState(handler);
+				State.setState(new LobbyState(handler));
 				
 			}}));
 		

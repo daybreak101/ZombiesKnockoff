@@ -45,7 +45,7 @@ public class Nuke extends PowerUps{
 			handler.getWorld().getEntityManager().getEntities().remove(e);
 		}
 		handler.getWorld().getEntityManager().getZombies().clear();
-		handler.getWorld().getEntityManager().getPlayer().gainPoints(400);
+		handler.getWorld().getEntityManager().getPlayer().getInv().gainPoints(400);
 	}
 
 	@Override

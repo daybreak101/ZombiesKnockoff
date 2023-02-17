@@ -1,6 +1,9 @@
 package entities;
 
 import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Random;
@@ -14,6 +17,7 @@ import entities.creatures.Zombie;
 import entities.powerups.PowerUps;
 import entities.statics.Barrier;
 import entities.statics.InteractableStaticEntity;
+import entities.statics.Wall;
 import entities.statics.traps.Trap;
 import main.Handler;
 
@@ -37,6 +41,7 @@ public class EntityManager {
 	private ArrayList<Trap> traps;
 	private ArrayList<InteractableStaticEntity> interactables;
 	private ArrayList<Areas> areas;
+	private ArrayList<Wall> walls;
 	private Comparator<Entity> renderSorter = new Comparator<Entity>() {
 		public int compare(Entity a, Entity b) {
 			if (a.getY() + a.getHeight() < b.getY() + b.getHeight())
@@ -46,6 +51,13 @@ public class EntityManager {
 			return 0;
 		}
 	};
+	
+	public int numOfEntities() {
+		//1 for player
+		return 1 + zombies.size() + blood.size() + entities.size() + traps.size() + barriers.size() + powerups.size() + areas.size() + interactables.size() + walls.size();
+	}
+	
+	private Rectangle renderArea;
 
 	public EntityManager(Handler handler, Player player) {
 		this.handler = handler;
@@ -60,6 +72,7 @@ public class EntityManager {
 		addEntity(player);
 		handler.setPlayer(player);
 		zombies = new ArrayList<Zombie>();
+		walls = new ArrayList<Wall>();
 	}
 
 	public void tick() {
@@ -106,13 +119,12 @@ public class EntityManager {
 		for (Barrier e : barriers) {
 			e.tick();
 		}
+		for (Wall e: walls) {
+			e.tick();
+		}
 
 		// System.out.println("Number of entities: " + numOfEntities());
 
-	}
-
-	public int numOfEntities() {
-		return blood.size() + entities.size() + traps.size();
 	}
 
 	public void setMap(Entity e) {
@@ -120,32 +132,58 @@ public class EntityManager {
 	}
 
 	public void render(Graphics g) {
+		
 		if (map != null) {
 			map.render(g);
 		}
 		for (Areas e : areas) {
 			e.render(g);
 		}
-
+		//renderArea = new Rectangle((int)handler.getGameCamera().getxOffset(),(int)handler.getGameCamera().getyOffset(),handler.getWidth(), handler.getHeight());
+		
 		for (Trap e : traps) {
-			e.render(g);
+			//if(renderArea.intersects(e.getCollisionBounds(0, 0)))
+				e.render(g);
 		}
+
 		for (Blood e : blood) {
-			e.render(g);
+			//if(renderArea.intersects(e.getRect()))
+				e.render(g);
 		}
-		for (PowerUps e : powerups) {
-			e.render(g);
+		for (Entity e : entities) {
+			//if(renderArea.intersects(e.getCollisionBounds(0, 0)))
+				e.render(g);
+			//Point2D.Float point = new Point2D.Float((int) e.getX(), (int)e.getY());
+			//if(renderArea.contains(point)) {
+			//	e.render(g);
+			//}
+			
 		}
 		for (Barrier e : barriers) {
-			e.render(g);
+			//if(renderArea.intersects(e.getCollisionBounds(0, 0)))
+				e.render(g);
 		}
+		for(InteractableStaticEntity e: interactables) {
+			//if(renderArea.intersects(e.getCollisionBounds(0, 0)))
+				e.render(g);
+		}
+		for (PowerUps e : powerups) {
+			//if(renderArea.intersects(e.getCollisionBounds(0, 0)))
+				e.render(g);
+		}	
+		
 		for(Zombie e: zombies){
-			e.render(g);
+			//if(renderArea.intersects(e.getHitBox(0, 0)))
+				e.render(g);
+		}	
+		
+		player.render(g);
+		for(Wall e: walls) {
+			//if(renderArea.intersects(e.getCollisionBounds(0, 0)))
+				e.render(g);
 		}
 
-		for (Entity e : entities) {
-			e.render(g);
-		}
+
 		if (luna != null) {
 			luna.render(g);
 		}
@@ -174,7 +212,7 @@ public class EntityManager {
 	}
 
 	public void addInteractable(InteractableStaticEntity e) {
-		entities.add(e);
+		//entities.add(e);
 		interactables.add(e);
 	}
 
@@ -195,9 +233,19 @@ public class EntityManager {
 		interactables.add(e);
 	}
 	
+	public void addWall(Wall e) {
+		walls.add(e);
+	}
+	
+	
+	
 	// getters and setters.
 	public Handler getHandler() {
 		return handler;
+	}
+	
+	public ArrayList<Wall> getWalls(){
+		return walls;
 	}
 
 	public void setHandler(Handler handler) {

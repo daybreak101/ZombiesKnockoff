@@ -39,7 +39,7 @@ public class MaxAmmo extends PowerUps{
 	
 	@Override
 	public void fulfillInteraction() {
-		handler.getWorld().getEntityManager().getPlayer().maxAmmo();
+		handler.getWorld().getEntityManager().getPlayer().getInv().maxAmmo();
 	}
 
 	@Override

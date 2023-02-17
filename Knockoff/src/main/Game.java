@@ -121,6 +121,7 @@ public class Game implements Runnable {
 		g.dispose();
 	}
 
+	public int frames;
 	@Override
 	public void run() {
 		init();
@@ -148,7 +149,7 @@ public class Game implements Runnable {
 			}
 			
 			if(timer >= 1000000000) {
-				System.out.println("Ticks and Frames: " + ticks);
+				frames = ticks;
 				ticks = 0;
 				timer = 0;
 			}
@@ -200,6 +201,10 @@ public class Game implements Runnable {
 	
 	public void closeGame() {
 		System.exit(0);
+	}
+	
+	public int getFPS() {
+		return frames;
 	}
 
 }

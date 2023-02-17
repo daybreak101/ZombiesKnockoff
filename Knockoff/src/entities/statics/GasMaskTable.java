@@ -31,7 +31,7 @@ public class GasMaskTable extends InteractableStaticEntity {
 		GasMask gasMask = handler.getPlayer().getInv().getGasMask();
 		if(cooldownTimer >= cooldown ) {
 			cooldownTimer = 0;
-			if(handler.getPlayer().purchase(1000) && gasMask.getCurrentDurability() < gasMask.getMaxDurability()) {
+			if(handler.getPlayer().getInv().purchase(1000) && gasMask.getCurrentDurability() < gasMask.getMaxDurability()) {
 				gasMask.repairMask();;
 				cantAfford = false;
 			}
@@ -55,10 +55,10 @@ public class GasMaskTable extends InteractableStaticEntity {
 	public void postTick() {
 		
 		if(cantAfford && cooldownTimer < cooldown) {
-			triggerText = "              Not enough points!";
+			triggerText = "Not enough points!";
 		}
 		else if(hasGasMask && cooldownTimer < cooldown) {
-			triggerText = "               Already have gas mask!";
+			triggerText = "Already have gas mask!";
 		}
 		else if(cooldownTimer >= cooldown) {
 			hasGasMask = false;

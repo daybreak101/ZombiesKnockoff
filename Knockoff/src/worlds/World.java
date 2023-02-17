@@ -19,6 +19,7 @@ import entities.statics.InteractableStaticEntity;
 import entities.statics.MysteryBox;
 import entities.statics.PackAPunch;
 import entities.statics.RandomPerk;
+import entities.statics.RitualCircle;
 import entities.statics.Wall;
 import entities.statics.traps.ConveyorBeltTrap;
 import entities.statics.traps.ElectricTrap;
@@ -49,6 +50,8 @@ public class World {
 	private int[][] nextStep; // [src][dest]
 	// int i = 0;
 	int ticker = 0, tickerLimit = 600;
+	
+	boolean nodesVisible;
 
 	public World(Handler handler, String path, String entityPath, String nodesPath, String edgesPath) {
 		this.handler = handler;
@@ -57,7 +60,7 @@ public class World {
 
 		spawners = new ArrayList<Spawner>();
 
-		rounds = new RoundLogic(handler, spawners);
+		rounds = new RoundLogic(handler, spawners, 0);
 		handler.setRoundLogic(rounds);
 
 		loadWorld(path);
@@ -80,6 +83,7 @@ public class World {
 
 		entityManager.getPlayer().setX(spawnX);
 		entityManager.getPlayer().setY(spawnY);
+		nodesVisible = false;
 	}
 	
 	public void createEdges(String edgesPath) {
@@ -113,12 +117,13 @@ public class World {
 		int i = 0;
 
 		// process nodes
-		int vertex, x, y;
+		int vertex, x, y, withinPlayable;
 		while(i < tokens.length) {
 			vertex = Utils.parseInt(tokens[i++]);
 			x = Utils.parseInt(tokens[i++]);
 			y = Utils.parseInt(tokens[i++]);
-			nodes.add(new Node(vertex, x, y));
+			withinPlayable = Utils.parseInt(tokens[i++]);
+			nodes.add(new Node(vertex, x, y, withinPlayable));
 		}
 	}
 
@@ -129,6 +134,7 @@ public class World {
 		int token = 0;
 		int x, y;
 		int vertex = 0;
+		int rotation = 0;
 		while (i < tokens.length) {
 			token = Utils.parseInt(tokens[i++]);
 			x = Utils.parseInt(tokens[i++]);
@@ -152,7 +158,7 @@ public class World {
 			case 5:
 				int wallLength = Utils.parseInt(tokens[i++]);
 				int whatWall = Utils.parseInt(tokens[i++]);
-				entityManager.addInteractable(new Wall(handler, x, y, wallLength, whatWall));
+				entityManager.addWall(new Wall(handler, x, y, wallLength, whatWall));
 				break;
 			case 6:
 				entityManager.setMap(new FactoryMap(handler, 99, 99, 3400, 1700));
@@ -160,22 +166,26 @@ public class World {
 			case 7:
 				int sx = Utils.parseInt(tokens[i++]);
 				int sy = Utils.parseInt(tokens[i++]);
-				entityManager.addTrap(new ElectricTrap(handler, x, y, sx, sy, 0));
+				rotation = Utils.parseInt(tokens[i++]);
+				entityManager.addTrap(new ElectricTrap(handler, x, y, sx, sy, rotation));
 				break;
 			case 8:
 				sx = Utils.parseInt(tokens[i++]);
 				sy = Utils.parseInt(tokens[i++]);
-				entityManager.addTrap(new MineFieldTrap(handler, x, y, sx, sy, 0));
+				rotation = Utils.parseInt(tokens[i++]);
+				entityManager.addTrap(new MineFieldTrap(handler, x, y, sx, sy, rotation));
 				break;
 			case 9:
 				sx = Utils.parseInt(tokens[i++]);
 				sy = Utils.parseInt(tokens[i++]);
-				entityManager.addTrap(new Turret(handler, x, y, sx, sy, 0));
+				rotation = Utils.parseInt(tokens[i++]);
+				entityManager.addTrap(new Turret(handler, x, y, sx, sy, rotation));
 				break;
 			case 10:
 				sx = Utils.parseInt(tokens[i++]);
 				sy = Utils.parseInt(tokens[i++]);
-				entityManager.addTrap(new ConveyorBeltTrap(handler, x, y, sx, sy, 0));
+				rotation = Utils.parseInt(tokens[i++]);
+				entityManager.addTrap(new ConveyorBeltTrap(handler, x, y, sx, sy, rotation));
 				break;
 			case 11:
 				entityManager.addArea(new IcyWater(handler, x, y));
@@ -183,6 +193,9 @@ public class World {
 			case 12:
 				whatWall = Utils.parseInt(tokens[i++]);
 				entityManager.addBarrier(new Barrier(handler, x, y, whatWall));
+				break;
+			case 13:
+				entityManager.addInteractable(new RitualCircle(handler, x, y));
 				break;
 			default:
 				break;
@@ -226,23 +239,28 @@ public class World {
 		g2d.setTransform(old);
 		entityManager.render(g);
 
-		g.setColor(Color.red);
-		for (Node n : nodes) {
-			g.fillOval((int) (n.getX() - handler.getGameCamera().getxOffset()),
-					(int) (n.getY() - handler.getGameCamera().getyOffset()), 5, 5);
-			g.drawString(Integer.toString(n.getVertex()), (int) (n.getX() - handler.getGameCamera().getxOffset()),
-					(int) (n.getY() - handler.getGameCamera().getyOffset()));
-			g.drawString(Integer.toString(n.getX()) + ", " + Integer.toString(n.getY()),
-					(int) (n.getX() - handler.getGameCamera().getxOffset()),
-					(int) (n.getY() + 10 - handler.getGameCamera().getyOffset()));
-			for(Node m : nodes) {
-				Node nextStep = n.getNextNode(m.getVertex());
-				if(nextStep != null)
-					g.drawLine((int) (n.getX()- handler.getGameCamera().getxOffset()), (int) (n.getY()- handler.getGameCamera().getyOffset()), 
-							(int) (nextStep.getX()- handler.getGameCamera().getxOffset()), (int) (nextStep.getY()- handler.getGameCamera().getyOffset()));
+		if(nodesVisible) {
+			g.setColor(Color.red);
+			for (Node n : nodes) {
+				g.fillOval((int) (n.getX() - handler.getGameCamera().getxOffset()),
+						(int) (n.getY() - handler.getGameCamera().getyOffset()), 5, 5);
+				g.drawString(Integer.toString(n.getVertex()), (int) (n.getX() - handler.getGameCamera().getxOffset()),
+						(int) (n.getY() - handler.getGameCamera().getyOffset()));
+				g.drawString(Integer.toString(n.getX()) + ", " + Integer.toString(n.getY()),
+						(int) (n.getX() - handler.getGameCamera().getxOffset()),
+						(int) (n.getY() + 10 - handler.getGameCamera().getyOffset()));
+				for (Node m : nodes) {
+					Node nextStep = n.getNextNode(m.getVertex());
+					if (nextStep != null)
+						g.drawLine((int) (n.getX() - handler.getGameCamera().getxOffset()),
+								(int) (n.getY() - handler.getGameCamera().getyOffset()),
+								(int) (nextStep.getX() - handler.getGameCamera().getxOffset()),
+								(int) (nextStep.getY() - handler.getGameCamera().getyOffset()));
+				}
 			}
 		}
-
+		g.setColor(new Color(0,0,0,55));
+		g.fillRect(0, 0, width * 100, height * 100);
 		old.scale(1 / zoomLevel, 1 / zoomLevel);
 		g2d.setTransform(old);
 		/////////////////////////////////////////////////////////////
@@ -364,6 +382,11 @@ public class World {
 				}
 			}
 		}
+		for(Wall e: handler.getWorld().getEntityManager().getWalls()) {
+			if(line.intersects(e.getCollisionBounds(0, 0))) {
+				return true;
+			}
+		}
 
 		return false;
 	}
@@ -377,7 +400,16 @@ public class World {
 				}
 			}
 		}
+		for(Wall e: handler.getWorld().getEntityManager().getWalls()) {
+			if(point.intersects(e.getCollisionBounds(0, 0))) {
+				return true;
+			}
+		}
 		return false;
+	}
+	
+	public void showNodesAndEdges() {
+		nodesVisible = true;
 	}
 
 }

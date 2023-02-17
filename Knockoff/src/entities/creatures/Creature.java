@@ -3,7 +3,7 @@ package entities.creatures;
 import entities.Entity;
 import main.Handler;
 
-public abstract class Creature extends Entity {
+public class Creature extends Entity {
 	
 	public static final float DEFAULT_SPEED = 3.0f;
 	public static final int DEFAULT_CREATURE_WIDTH = 75, 
@@ -65,6 +65,10 @@ public abstract class Creature extends Entity {
 
 	public void setSpeed(float speed) {
 		this.speed = speed;
+	}
+
+	public void takeDamage(int burnDamage) {
+		
 	}
 	
 	

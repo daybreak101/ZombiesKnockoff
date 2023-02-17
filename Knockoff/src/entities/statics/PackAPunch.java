@@ -36,7 +36,7 @@ public class PackAPunch extends InteractableStaticEntity {
 	public void fulfillInteraction() {
 		if (!isUpgrading && cooldownTimer >= cooldown && !handler.getPlayer().getInv().getGun().isUpgraded()) {
 			// can afford
-			if (handler.getPlayer().purchase(5000)) {
+			if (handler.getPlayer().getInv().purchase(5000)) {
 				isUpgrading = true;
 				cantAfford = false;
 				cantUpgrade = false;
@@ -84,9 +84,9 @@ public class PackAPunch extends InteractableStaticEntity {
 				if (gunPacked == null) {
 					isUpgrading = false;
 					cantUpgrade = true;
-					handler.getPlayer().gainPoints(5000);
+					handler.getPlayer().getInv().gainPoints(5000);
 				} else {
-					handler.getPlayer().removeGunForUpgrade();
+					handler.getPlayer().getInv().removeGunForUpgrade();
 					handler.getGlobalStats().addGunUpgrade();
 					gunPacked.upgradeWeapon();
 				}
@@ -108,7 +108,7 @@ public class PackAPunch extends InteractableStaticEntity {
 			cooldownTimer = 0;
 			isUpgrading = false;
 			packCounter = 0;
-			handler.getPlayer().setGun(gunPacked);
+			handler.getPlayer().getInv().setGun(gunPacked);
 		}
 
 	}
@@ -117,7 +117,7 @@ public class PackAPunch extends InteractableStaticEntity {
 	public void postTick() {
 		if (cantAfford && cooldownTimer < cooldown) {
 			packCounter = 0;
-			triggerText = "              Not enough points!";
+			triggerText = "Not enough points!";
 		} else if (cantUpgrade && cooldownTimer < cooldown) {
 			triggerText = "     	 Weapon is not upgradable!";
 		} else if (isUpgrading && cooldownTimer >= cooldown) {
@@ -131,7 +131,7 @@ public class PackAPunch extends InteractableStaticEntity {
 			triggerText = "Press F to upgrade weapon: 5000";
 			gunPacked = null;
 		} else if (isUpgrading) {
-			triggerText = "            Upgrading...";
+			triggerText = "Upgrading...";
 		} else {
 			triggerText = "";
 		}

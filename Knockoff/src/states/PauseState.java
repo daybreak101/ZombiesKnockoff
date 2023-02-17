@@ -58,7 +58,7 @@ public class PauseState extends State {
 
 	@Override
 	public void tick() {
-		uiManager.tick();
+		uiManager.tick(); 
 	}
 
 	@Override
@@ -72,6 +72,10 @@ public class PauseState extends State {
 		uiManager.render(g);
 		g.setColor(handler.getSettings().getLaserColor());
 		g.fillRect(handler.getMouseManager().getMouseX(), handler.getMouseManager().getMouseY(), 8, 8);
+
+		g.drawString(Integer.toString(handler.getProgression().getLevel()), 500, 700);
+		g.drawString(Long.toString(handler.getProgression().getXP()), 600, 700);
+		g.drawString("/ " + Long.toString(handler.getProgression().getXPNeeded()), 700, 700);
 
 	}
 

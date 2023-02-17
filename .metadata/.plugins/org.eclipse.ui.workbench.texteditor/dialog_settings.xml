@@ -6,31 +6,31 @@
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
-		<item key="selection" value="Barrier"/>
+		<item key="selection" value="checkEntity"/>
 		<list key="findhistory">
+			<item value="checkentity"/>
+			<item value="setspeed"/>
+			<item value="dontmove"/>
+			<item value="system"/>
+			<item value="iscritical"/>
+			<item value="throwgrenade"/>
+			<item value="turntocrawler"/>
+			<item value="tookdamage"/>
+			<item value="hitbox"/>
 			<item value="barrier"/>
 			<item value="barroer"/>
-			<item value="system"/>
 			<item value="system.out"/>
-			<item value="checkentity"/>
 			<item value="gethitbox"/>
 			<item value="check"/>
 			<item value="anglex"/>
-			<item value="die"/>
-			<item value="checkForObstacles"/>
-			<item value="checkforobstacles"/>
-			<item value="gainpoints"/>
-			<item value="checkfor"/>
-			<item value="getcollision"/>
-			<item value="input"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
-		<item key="DIALOG_X_ORIGIN" value="1394"/>
-		<item key="DIALOG_Y_ORIGIN" value="118"/>
+		<item key="DIALOG_X_ORIGIN" value="30"/>
+		<item key="DIALOG_Y_ORIGIN" value="356"/>
 		<item key="DIALOG_WIDTH" value="414"/>
 		<item key="DIALOG_HEIGHT" value="454"/>
 		<item key="DIALOG_FONT_NAME" value="1|Segoe UI|9.0|0|WINDOWS|1|-15|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI"/>

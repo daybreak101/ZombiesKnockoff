@@ -32,8 +32,10 @@ public class RoundLogic {
 
 	private List<Spawner> queue;
 	private ArrayList<Spawner> spawners;
+	boolean test;
+	int map;
 
-	public RoundLogic(Handler handler, ArrayList<Spawner> spawners) {
+	public RoundLogic(Handler handler, ArrayList<Spawner> spawners, int map) {
 		this.handler = handler;
 		currentRound = 0;
 		nextDogRound = 5;
@@ -42,10 +44,14 @@ public class RoundLogic {
 		powerups = new PowerUpManager(handler);
 		this.spawners = spawners;
 		queue = new ArrayList<Spawner>();
+		test = false;
+		this.map = map;
 	}
 
 	public void tick() {
-		if (currentRound == -1) {
+		if (test) {
+
+		} else if (currentRound == -1) {
 			noMansLandCycle();
 		} else {
 			getReadySpawners();
@@ -53,6 +59,7 @@ public class RoundLogic {
 				counter++;
 				if (counter >= roundCooldown) {
 					counter = 0;
+					handler.getProgression().gainXP(currentRound * 100);
 					nextRound();
 				}
 
@@ -71,7 +78,7 @@ public class RoundLogic {
 		spawner();
 		ringBell.tick();
 		if (ringBell.isReady()) {
-			
+
 			n++;
 			System.out.println("RING! #" + (n));
 			ringBell = new Timer(interval * n);
@@ -84,7 +91,7 @@ public class RoundLogic {
 
 			int oldHealth = zombieHealth;
 			zombieHealth = zombieHealth * 2;
-			
+
 			System.out.println("NEW HEALTH: " + zombieHealth);
 
 			// increase zombieSpeed
@@ -127,33 +134,40 @@ public class RoundLogic {
 			queue.remove(randomIndex);
 
 			zombiesLeft--;
-			//if(currentRound == 1) {
-			//	spawnTicker = 0;
-			//	spawner.spawnStoker(dSpeed, zombieHealth);
-			//}
-			//else
-			if (isDogRound) {
-				spawnTicker = 0;
-				spawner.spawnLicker(dSpeed, zombieHealth);
-			} else if (currentRound < 6) {
+			// if(currentRound == 1) {
+			// spawnTicker = 0;
+			// spawner.spawnStoker(dSpeed, zombieHealth);
+			// }
+			// else
+
+			if (map == 0) {
 				spawnTicker = 0;
 				spawner.spawnZombie(dSpeed, zombieHealth);
-			} else if (currentRound > 7 && currentRound % 3 == 0) {
-				spawnTicker = 0;
-				int rng = rand.nextInt(100);
-				if (rng < 10)
-					spawner.spawnToxen(dSpeed, zombieHealth);
-				else if (rng < 15 && rng >= 10)
-					spawner.spawnLicker(dSpeed, zombieHealth);
-				else
-					spawner.spawnZombie(dSpeed, zombieHealth);
+				//spawner.spawnToxen(dSpeed, zombieHealth);
 			} else {
-				spawnTicker = 0;
-				int rng = rand.nextInt(100);
-				if (rng < 5)
+				if (isDogRound) {
+					spawnTicker = 0;
 					spawner.spawnLicker(dSpeed, zombieHealth);
-				else
+				} else if (currentRound < 6) {
+					spawnTicker = 0;
 					spawner.spawnZombie(dSpeed, zombieHealth);
+				} else if (currentRound > 7 && currentRound % 3 == 0) {
+					spawnTicker = 0;
+					int rng = rand.nextInt(100);
+					if (rng < 10)
+						spawner.spawnToxen(dSpeed, zombieHealth);
+					else if (rng < 15 && rng >= 10)
+						spawner.spawnLicker(dSpeed, zombieHealth);
+					else
+						spawner.spawnZombie(dSpeed, zombieHealth);
+				} else {
+					spawnTicker = 0;
+					int rng = rand.nextInt(100);
+					if (rng < 5)
+						spawner.spawnLicker(dSpeed, zombieHealth);
+					else
+						spawner.spawnZombie(dSpeed, zombieHealth);
+				}
 			}
 		}
 	}
@@ -166,13 +180,11 @@ public class RoundLogic {
 
 		if (currentRound == -1) {
 			zpr = 10000;
-		} 
-		//else if(currentRound == 1){
-		//	zpr = 1;
-		//}
-		else if (currentRound == nextDogRound) {
-		
-
+		}
+		// else if(currentRound == 1){
+		// zpr = 1;
+		// }
+		else if (map != 0 && currentRound == nextDogRound) {
 			zpr = 6;
 			isDogRound = true;
 		} else {
@@ -185,7 +197,7 @@ public class RoundLogic {
 		calculatedSpeed();
 		zombiesLeft = zpr;
 		powerups.resetManager();
-		handler.getWorld().getEntityManager().getPlayer().roundReplenishGrenades();
+		handler.getWorld().getEntityManager().getPlayer().getInv().roundReplenishGrenades();
 		handler.getGlobalStats().writeToFile();
 	}
 
@@ -252,11 +264,11 @@ public class RoundLogic {
 	public void calculateHealth() {
 		int health = 50;
 		for (int i = 1; i <= currentRound; i++) {
-			//health cap
-			//if (i == 30) {
-			//	zombieHealth = health;
-			//	return;
-			//}
+			// health cap
+			// if (i == 30) {
+			// zombieHealth = health;
+			// return;
+			// }
 			if (i >= 10)
 				health = health + (int) (health * 0.10);
 			else
@@ -303,6 +315,10 @@ public class RoundLogic {
 
 	public void setCurrentRound(int currentRound) {
 		this.currentRound = currentRound;
+	}
+	
+	public void wipeRound() {
+		zombiesLeft = 0;
 	}
 
 }

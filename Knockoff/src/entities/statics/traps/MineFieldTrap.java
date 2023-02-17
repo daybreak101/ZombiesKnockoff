@@ -59,7 +59,7 @@ public class MineFieldTrap extends Trap {
 		}
 		
 		if(explosionRadius.intersects(handler.getPlayer().getCollisionBounds(0, 0))){
-			if(!handler.getPlayer().getInv().isPhd())
+			if(handler.getPlayer().getInv().getPhd() == -1)
 				handler.getPlayer().takeDamage(60);
 		}
 	}

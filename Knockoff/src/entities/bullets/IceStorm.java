@@ -44,12 +44,12 @@ public class IceStorm extends Bullet {
 
 		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (stormRadius.intersects(e.getHitBox(0, 0))) {
-				e.freeze();
+				e.getFreezeStatus().freeze();
 			}
 		}
 
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			if (e.getCollisionBounds(0, 0).intersects(cb)) {
+			if (!handler.getWorld().getEntityManager().getBarriers().contains(e) && e.getCollisionBounds(0, 0).intersects(cb)) {
 				handler.getWorld().getEntityManager().getEntities().remove(this);
 				return true;
 			}
@@ -61,7 +61,7 @@ public class IceStorm extends Bullet {
 
 	public void die() {
 		rangeCounter++;
-		if (handler.getPlayer().getInv().isDeadshot()) {
+		if (handler.getPlayer().getInv().getDeadshot() > -1) {
 			if (rangeCounter >= range * 1.5) {
 				speed = 0;
 				xMove = 0;

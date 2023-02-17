@@ -7,21 +7,21 @@ public class PhD extends Perk {
 	
 	//immunity to explosives
 
-	public PhD(Handler handler) {
-		super(handler);
+	public PhD(Handler handler, int level) {
+		super(handler, level);
 		this.name = "PhD Armor";
 		this.icon = Assets.phd;
 	}
 
 	@Override
 	public void buff() {
-		handler.getPlayer().getInv().setPhd(true);
+		handler.getPlayer().getInv().setPhd(level);
 		
 	}
 
 	@Override
 	public void debuff() {
-		handler.getPlayer().getInv().setPhd(false);
+		handler.getPlayer().getInv().setPhd(-1);
 		
 	}
 

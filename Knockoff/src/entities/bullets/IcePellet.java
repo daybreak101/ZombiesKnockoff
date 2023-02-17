@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 
 import entities.creatures.Zombie;
 import entities.statics.InteractableStaticEntity;
+import entities.statics.Wall;
 import main.Handler;
 
 public class IcePellet extends Bullet{
@@ -32,17 +33,19 @@ public class IcePellet extends Bullet{
 
 		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getHitBox(0, 0).intersects(cb)) {
-					//e.takeDamage((int) (gunFiredFrom.getDamage()));
-				if(!e.isFrozen()) {
-					e.freeze();
+				if(!e.getFreezeStatus().isFrozen()) {
+					e.getFreezeStatus().freeze();
 				}
-				
-					System.out.println("Damage: " + (int) (gunFiredFrom.getDamage()));
-				//handler.getWorld().getEntityManager().getEntities().remove(this);
 				return true;
 			}
 		}
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
+			if (!handler.getWorld().getEntityManager().getBarriers().contains(e) && e.getCollisionBounds(0, 0).intersects(cb)) {
+				handler.getWorld().getEntityManager().getEntities().remove(this);
+				return true;
+			}
+		}
+		for (Wall e : handler.getWorld().getEntityManager().getWalls()) {
 			if (e.getCollisionBounds(0, 0).intersects(cb)) {
 				handler.getWorld().getEntityManager().getEntities().remove(this);
 				return true;

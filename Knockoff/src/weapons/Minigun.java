@@ -1,8 +1,11 @@
 package weapons;
 
+import java.awt.geom.Line2D;
+
 import entities.bullets.Bullet;
 import entities.creatures.Player;
 import entities.creatures.Zombie;
+import entities.statics.Wall;
 import main.Handler;
 import sounds.Sounds;
 
@@ -13,6 +16,11 @@ public class Minigun extends Gun {
 
 	public Minigun(Handler handler) {
 		super(handler, 10000, 2, 0, 0, 0, 1.5f, 50);
+		name = "Minigun";
+	}
+	
+	public Minigun(Handler handler, boolean isTurret) {
+		super(handler, 2000, 2, 0, 0, 0, 1.5f, 50);
 		name = "Minigun";
 	}
 	
@@ -47,14 +55,26 @@ public class Minigun extends Gun {
 	public void shootAsTurret(float x, float y) {
 		int lowestDistanceSoFar = 2000000;
 		Zombie closestEntity = null;
+		boolean found = false;
+		
 		for (Zombie entity : handler.getWorld().getEntityManager().getZombies()) { // This loops through all the entities, setting the variable "entity" to each element.
 		    int zombieX = (int) (x - entity.getX());
 		    int zombieY = (int) (y - entity.getY());
+		    Line2D.Float line = new Line2D.Float(x, y, entity.getX() + entity.getWidth()/2, entity.getY() + entity.getHeight()/2);
 		    double distance = Math.sqrt((zombieX * zombieX) + (zombieY * zombieY));
 		    if (distance < lowestDistanceSoFar) {
-		        lowestDistanceSoFar = (int) distance;
-		        closestEntity = entity;
+			    for(Wall w: handler.getWorld().getEntityManager().getWalls()) {
+			    	if(line.intersects(w.getCollisionBounds(0, 0))){
+			    		found = true;
+			    	}
+			    }
+			    if(!found) {
+					lowestDistanceSoFar = (int) distance;
+					closestEntity = entity;
+			    }
+		
 		    }
+		    found = false;
 		}
 		if(closestEntity != null) {
 			if (readyToFire == true) {

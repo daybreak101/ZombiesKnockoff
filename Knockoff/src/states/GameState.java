@@ -7,6 +7,7 @@ import java.awt.geom.AffineTransform;
 
 import hud.GameplayElement;
 import hud.HudManager;
+import main.Cheats;
 import main.Handler;
 import sounds.Sounds;
 import worlds.World;
@@ -15,6 +16,7 @@ public class GameState extends State {
 
 	private World world;
 	private HudManager hud;
+	private Cheats cheats;
 
 
 	public GameState(Handler handler) {
@@ -36,7 +38,7 @@ public class GameState extends State {
 		
 		
 		handler.setHud(hud);
-		Cheats cheats = new Cheats(handler);
+		cheats = new Cheats(handler);
 	}
 	
 
@@ -44,7 +46,7 @@ public class GameState extends State {
 	public void tick() {
 		world.tick();
 		hud.tick();
-		
+		cheats.tick();
 	}
 
 	int transparency = 255;

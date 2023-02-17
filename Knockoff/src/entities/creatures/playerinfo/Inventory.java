@@ -1,14 +1,11 @@
 package entities.creatures.playerinfo;
 
 import java.awt.Graphics;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Ellipse2D.Float;
+import java.util.Random;
 
-import entities.Entity;
+import entities.bullets.GasGrenade;
+import entities.bullets.Grenade;
 import entities.creatures.Player;
-import entities.creatures.Zombie;
-import entities.statics.InteractableStaticEntity;
 import hud.PointGainElement;
 import input.MouseManager;
 import main.Handler;
@@ -22,6 +19,7 @@ import weapons.Minigun;
 public class Inventory {
 	private Handler handler;
 	private Player player;
+	private Blessings blessings;
 
 	private int currentGun;
 	private Gun[] arsenal;
@@ -30,18 +28,22 @@ public class Inventory {
 	private int grenades;
 	private Knife knife;
 	private GasMask gasMask;
+	private int specialGrenadeAmt;
+	private int specialGrenadeType;
 
 	private Timer switchWeaponTimer;
 	private Timer grenadeReadyTimer;
 
 	// perk variables
-	private boolean jugg, doubletap, speedcola, deadshot, staminup, phd, vamp, mule, bandolier, stronghold, revive,
-			luna;
+	// -1 means not equipped, 0-3 represents perk levels with 0 being base level
+	private int jugg = -1, doubletap = -1, speedcola = -1, deadshot = -1, staminup = -1, phd = -1, vamp = -1, mule = -1,
+			bandolier = -1, stronghold = -1, revive = -1, luna = -1;
 	public boolean strongholdActivation = false;
 
 	public Inventory(Handler handler, Player player) {
 		this.handler = handler;
 		this.player = player;
+		this.blessings = new Blessings(handler);
 		switchWeaponTimer = new Timer(30);
 		grenadeReadyTimer = new Timer(30);
 
@@ -52,35 +54,31 @@ public class Inventory {
 		arsenal[3] = new Minigun(handler);
 		currentGun = 0;
 
-		perks = new Perk[4];
+		perks = new Perk[8];
 		perks[0] = null;
 		perks[1] = null;
 		perks[2] = null;
 		perks[3] = null;
+		perks[4] = null;
+		perks[5] = null;
+		perks[6] = null;
+		perks[7] = null;
 
 		knife = new Knife(handler);
 		gasMask = new GasMask(handler);
 		gasMask.setCurrentDurability(0);
 
+		specialGrenadeType = 0;
+		specialGrenadeAmt = 3;
+
 		grenades = 0;
 
 		points = 500;
 
-		jugg = false;
-		doubletap = false;
-		speedcola = false;
-		deadshot = false;
-		staminup = false;
-		phd = false;
-		vamp = false;
-		mule = false;
-		bandolier = false;
-		stronghold = false;
-		revive = false;
-		luna = false;
 	}
 
 	public void tick() {
+		blessings.tick();
 		switchWeaponTimer.tick();
 		grenadeReadyTimer.tick();
 		knife.tick();
@@ -105,7 +103,6 @@ public class Inventory {
 		MouseManager mouse = handler.getMouseManager();
 		int size = 7;
 		g.setColor(handler.getSettings().getLaserColor());
-
 		g.fillOval(mouse.getMouseX() - size / 2, mouse.getMouseY() - size / 2, size, size);
 	}
 
@@ -114,30 +111,80 @@ public class Inventory {
 			if (p != null)
 				p.debuff();
 		}
-		/*
-		 * perks[0].debuff(); perks[1].debuff(); perks[2].debuff(); perks[3].debuff();
-		 */
 		perks[0] = null;
 		perks[1] = null;
 		perks[2] = null;
 		perks[3] = null;
-		jugg = false;
-		doubletap = false;
-		speedcola = false;
-		deadshot = false;
-		staminup = false;
-		phd = false;
-		vamp = false;
-		mule = false;
-		bandolier = false;
-		stronghold = false;
-		revive = false;
-		luna = false;
+		jugg = -1;
+		doubletap = -1;
+		speedcola = -1;
+		deadshot = -1;
+		staminup = -1;
+		phd = -1;
+		vamp = -1;
+		mule = -1;
+		bandolier = -1;
+		stronghold = -1;
+		revive = -1;
+		luna = -1;
 	}
 
 	public boolean throwGrenade() {
 		if (grenadeReadyTimer.isReady() && grenades > 0) {
-			grenades--;
+			if (mule >= 1) {
+				Random rand = new Random();
+				int rng = rand.nextInt(3);
+				if (rng != 1) {
+					grenades--;
+				}
+			} else {
+				grenades--;
+			}
+			handler.getWorld().getEntityManager().addEntity(new Grenade(handler, player.getX() + player.getWidth() / 2,
+					player.getY() + player.getHeight() / 2, false,
+
+					handler.getMouseManager().getMouseX() + handler.getGameCamera().getxOffset(),
+					handler.getMouseManager().getMouseY() + handler.getGameCamera().getyOffset()
+					));
+			if (phd >= 1) {
+				handler.getWorld().getEntityManager().addEntity(new Grenade(handler,
+						player.getX() + player.getWidth() / 2 + 20, player.getY() + player.getHeight() / 2 + 20, false,
+
+						handler.getMouseManager().getMouseX() + handler.getGameCamera().getxOffset(),
+						handler.getMouseManager().getMouseY() + handler.getGameCamera().getyOffset()
+						));
+				handler.getWorld().getEntityManager().addEntity(new Grenade(handler,
+						player.getX() + player.getWidth() / 2 - 20, player.getY() + player.getHeight() / 2 - 20, false,
+
+						handler.getMouseManager().getMouseX() + handler.getGameCamera().getxOffset(),
+						handler.getMouseManager().getMouseY() + handler.getGameCamera().getyOffset()
+						 ));
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public boolean throwSpecialGrenade() {
+		if (grenadeReadyTimer.isReady() && specialGrenadeAmt > 0 && specialGrenadeType != -1) {
+			if (mule >= 2) {
+				Random rand = new Random();
+				int rng = rand.nextInt(5);
+				if (rng != 1) {
+					specialGrenadeAmt--;
+				}
+			} else {
+				specialGrenadeAmt--;
+			}
+			switch (specialGrenadeType) {
+			case 0:
+				handler.getWorld().getEntityManager().addEntity(new GasGrenade(handler,
+						player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2,
+						handler.getMouseManager().getMouseX() + handler.getGameCamera().getxOffset(),
+						handler.getMouseManager().getMouseY() + handler.getGameCamera().getyOffset()));
+				break;
+			}
+
 			return true;
 		}
 		return false;
@@ -160,12 +207,12 @@ public class Inventory {
 			if (currentGun == 0) {
 				if (arsenal[1] != null)
 					currentGun = 1;
-				else if (arsenal[2] != null && mule)
+				else if (arsenal[2] != null && mule > -1)
 					currentGun = 2;
 			}
 			// if on secondary, switch to primary, if it exists
 			else if (currentGun == 1) {
-				if (arsenal[2] != null && mule)
+				if (arsenal[2] != null && mule > -1)
 					currentGun = 2;
 				else if (arsenal[0] != null)
 					currentGun = 0;
@@ -179,7 +226,7 @@ public class Inventory {
 					currentGun = 0;
 				else if (arsenal[1] != null)
 					currentGun = 1;
-				else if (arsenal[2] != null && mule)
+				else if (arsenal[2] != null && mule > -1)
 					currentGun = 2;
 				else
 					currentGun = 0;
@@ -209,12 +256,17 @@ public class Inventory {
 
 		}
 		grenades = 4;
+
+		if (specialGrenadeType != -1)
+			specialGrenadeAmt = 3;
 	}
 
 	public void infiniteAmmo() {
 		arsenal[currentGun].setCurrentClip(arsenal[currentGun].getClip());
 		arsenal[currentGun].setReloading(false);
 		grenades = 4;
+		if (specialGrenadeType != -1)
+			specialGrenadeAmt = 3;
 	}
 
 	public void purchaseAmmo() {
@@ -232,15 +284,14 @@ public class Inventory {
 	}
 
 	public void gainPoints(int add) {
-		if (handler.getRoundLogic().getPowerups().isDoublePointsActive()) {
-			points += (add * 2);
-			player.getStats().gainScore(add * 2);
-			handler.getHud().addObject(new PointGainElement(handler, add * 2, true));
-		} else {
-			points += add;
-			player.getStats().gainScore(add);
-			handler.getHud().addObject(new PointGainElement(handler, add, true));
-		}
+		if (blessings.isRunning() && blessings.getBlessing() == "Extra Change")
+			add = add + add / 2;
+		if (handler.getRoundLogic().getPowerups().isDoublePointsActive())
+			add = add * 2;
+		points += add;
+		player.getStats().gainScore(add);
+		handler.getHud().addObject(new PointGainElement(handler, add, true));
+		blessings.addPoints(add);
 	}
 
 	public boolean purchase(int price) {
@@ -259,7 +310,7 @@ public class Inventory {
 		} else if (arsenal[1] == null) {
 			arsenal[1] = gun;
 			currentGun = 1;
-		} else if (arsenal[2] == null && mule) {
+		} else if (arsenal[2] == null && mule > -1) {
 			arsenal[2] = gun;
 			currentGun = 2;
 		} else
@@ -274,11 +325,12 @@ public class Inventory {
 				}
 			}
 		}
+
 		return false;
 	}
 
 	public boolean checkPerks(Perk perk) {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 8; i++) {
 			if (perks[i] != null) {
 				if (perks[i].getName() == perk.getName()) {
 					return true;
@@ -291,6 +343,22 @@ public class Inventory {
 	public void addPerk(Perk perk) {
 		for (int i = 0; i < 4; i++) {
 			if (perks[i] == null) {
+				if (perk.getLevel() == 3 && i != 3) {
+					perk.setLevel(2);
+				}
+				perks[i] = perk;
+				perks[i].buff();
+				break;
+			}
+		}
+	}
+
+	public void givePerk(Perk perk) {
+		for (int i = 0; i < 8; i++) {
+			if (perks[i] == null) {
+				if (perk.getLevel() == 3 && i != 3) {
+					perk.setLevel(2);
+				}
 				perks[i] = perk;
 				perks[i].buff();
 				break;
@@ -348,46 +416,6 @@ public class Inventory {
 		return perks;
 	}
 
-	public boolean isDoubletap() {
-		return doubletap;
-	}
-
-	public void setDoubletap(boolean doubletap) {
-		this.doubletap = doubletap;
-	}
-
-	public boolean isVamp() {
-		return vamp;
-	}
-
-	public void setVamp(boolean vamp) {
-		this.vamp = vamp;
-	}
-
-	public boolean isMule() {
-		return mule;
-	}
-
-	public void setMule(boolean mule) {
-		this.mule = mule;
-	}
-
-	public boolean isStronghold() {
-		return stronghold;
-	}
-
-	public void setStronghold(boolean stronghold) {
-		this.stronghold = stronghold;
-	}
-
-	public boolean isRevive() {
-		return revive;
-	}
-
-	public void setRevive(boolean revive) {
-		this.revive = revive;
-	}
-
 	public int getCurrentGun() {
 		return currentGun;
 	}
@@ -396,61 +424,117 @@ public class Inventory {
 		this.currentGun = currentGun;
 	}
 
-	public boolean isJugg() {
-		return jugg;
-	}
-
-	public void setJugg(boolean jugg) {
+	public void setJugg(int jugg) {
 		this.jugg = jugg;
 		player.setHealth();
 	}
 
-	public boolean isSpeedcola() {
+	public int getDoubletap() {
+		return doubletap;
+	}
+
+	public void setDoubletap(int doubletap) {
+		this.doubletap = doubletap;
+	}
+
+	public int getSpeedcola() {
 		return speedcola;
 	}
 
-	public void setSpeedcola(boolean speedcola) {
+	public void setSpeedcola(int speedcola) {
 		this.speedcola = speedcola;
 	}
 
-	public boolean isDeadshot() {
+	public int getDeadshot() {
 		return deadshot;
 	}
 
-	public void setDeadshot(boolean deadshot) {
+	public void setDeadshot(int deadshot) {
 		this.deadshot = deadshot;
 	}
 
-	public boolean isStaminup() {
+	public int getStaminup() {
 		return staminup;
 	}
 
-	public void setStaminup(boolean staminup) {
+	public void setStaminup(int staminup) {
 		this.staminup = staminup;
 	}
 
-	public boolean isPhd() {
+	public int getPhd() {
 		return phd;
 	}
 
-	public void setBandolier(boolean bandolier) {
-		this.bandolier = bandolier;
-	}
-
-	public boolean isBandolier() {
-		return bandolier;
-	}
-
-	public void setPhd(boolean phd) {
+	public void setPhd(int phd) {
 		this.phd = phd;
 	}
 
-	public boolean isLuna() {
+	public int getVamp() {
+		return vamp;
+	}
+
+	public void setVamp(int vamp) {
+		this.vamp = vamp;
+	}
+
+	public int getMule() {
+		return mule;
+	}
+
+	public void setMule(int mule) {
+		this.mule = mule;
+	}
+
+	public int getBandolier() {
+		return bandolier;
+	}
+
+	public void setBandolier(int bandolier) {
+		this.bandolier = bandolier;
+	}
+
+	public int getStronghold() {
+		return stronghold;
+	}
+
+	public void setStronghold(int stronghold) {
+		this.stronghold = stronghold;
+	}
+
+	public int getRevive() {
+		return revive;
+	}
+
+	public void setRevive(int revive) {
+		this.revive = revive;
+	}
+
+	public int getLuna() {
 		return luna;
 	}
 
-	public void setLuna(boolean luna) {
+	public void setLuna(int luna) {
 		this.luna = luna;
 	}
 
+	public int getJugg() {
+		return jugg;
+	}
+
+	public int getSpecialGrenadeAmt() {
+		return specialGrenadeAmt;
+	}
+
+	public int getSpecialGrenadeType() {
+		return specialGrenadeType;
+	}
+
+	public void setSpecialGrenade(int type) {
+		specialGrenadeType = type;
+		specialGrenadeAmt = 3;
+	}
+
+	public Blessings getBlessings() {
+		return blessings;
+	}
 }

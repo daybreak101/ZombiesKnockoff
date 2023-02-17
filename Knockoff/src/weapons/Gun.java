@@ -16,8 +16,8 @@ public abstract class Gun {
 	protected int timerToFire = 0;
 	protected int reloadTimer = 0;
 
-	protected boolean doubletap = false;
-	protected boolean speedcola = false;
+	protected int doubletap = -1;
+	protected int speedcola = -1;
 
 	protected boolean isUpgraded = false;
 
@@ -30,7 +30,7 @@ public abstract class Gun {
 		this.reloadSpeed = reloadSpeed;
 		this.clip = clip;
 		if (handler.getPlayer() != null) {
-			if (handler.getPlayer().getInv().isBandolier()) {
+			if (handler.getPlayer().getInv().getBandolier() > -1) {
 				this.maxReserve = maxReserve + clip;
 			} 
 			else {
@@ -96,21 +96,40 @@ public abstract class Gun {
 
 	// public abstract void render();
 	public void tick() {
-		doubletap = handler.getPlayer().getInv().isDoubletap();
-		speedcola = handler.getPlayer().getInv().isSpeedcola();
+		doubletap = handler.getPlayer().getInv().getDoubletap();
+		speedcola = handler.getPlayer().getInv().getSpeedcola();
 
 		if (isReloading) {
 			reloadTimer++;
-			if (speedcola && reloadTimer >= reloadSpeed / 2) {
+			if (speedcola == 0 && reloadTimer >= reloadSpeed * 9/10) {
 				reloadFinish();
 				isReloading = false;
 				reloadTimer = 0;
-			} else if (reloadTimer >= reloadSpeed) {
+			} 
+			else if (speedcola == 1 && reloadTimer >= reloadSpeed * 3/4) {
+				reloadFinish();
+				isReloading = false;
+				reloadTimer = 0;
+			} 
+			else if (speedcola == 2 && reloadTimer >= reloadSpeed / 2) {
+				reloadFinish();
+				isReloading = false;
+				reloadTimer = 0;
+			} 
+			else if (speedcola == 3 && reloadTimer >= reloadSpeed * 3/10) {
+				reloadFinish();
+				isReloading = false;
+				reloadTimer = 0;
+			} 
+			else if (reloadTimer >= reloadSpeed) {
 				reloadFinish();
 				isReloading = false;
 				reloadTimer = 0;
 			}
-		} else if (doubletap && timerToFire >= fireRate / 2) {
+		} else if (doubletap >= 2 && timerToFire >= fireRate / 2) {
+			readyToFire = true;
+			timerToFire = 0;
+		} else if (doubletap > -1 && timerToFire >= fireRate * 3/4) {
 			readyToFire = true;
 			timerToFire = 0;
 		} else if (timerToFire >= fireRate) {

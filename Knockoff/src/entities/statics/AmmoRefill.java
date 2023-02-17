@@ -25,8 +25,8 @@ public class AmmoRefill extends InteractableStaticEntity {
 		if(cooldownTimer >= cooldown &&
 				!(handler.getWorld().getEntityManager().getPlayer().getInv().getGun().getCurrentReserve() == handler.getWorld().getEntityManager().getPlayer().getInv().getGun().getMaxReserve())) {
 			cooldownTimer = 0;
-			if(handler.getWorld().getEntityManager().getPlayer().purchase(1000)) {
-				handler.getWorld().getEntityManager().getPlayer().purchaseAmmo();
+			if(handler.getWorld().getEntityManager().getPlayer().getInv().purchase(1000)) {
+				handler.getWorld().getEntityManager().getPlayer().getInv().purchaseAmmo();
 				cantAfford = false;
 			}
 			else {
@@ -38,8 +38,8 @@ public class AmmoRefill extends InteractableStaticEntity {
 		if(cooldownTimer >= cooldown && (handler.getPlayer().getInv().getGun().getName() == "Flamethrower" || handler.getPlayer().getInv().getGun().getName() == "HotBox") && 
 				!(handler.getPlayer().getInv().getGun().getCurrentClip() == handler.getPlayer().getInv().getGun().getClip())) {
 			cooldownTimer = 0;
-			if(handler.getWorld().getEntityManager().getPlayer().purchase(1000)) {
-				handler.getWorld().getEntityManager().getPlayer().purchaseAmmo();
+			if(handler.getWorld().getEntityManager().getPlayer().getInv().purchase(1000)) {
+				handler.getWorld().getEntityManager().getPlayer().getInv().purchaseAmmo();
 				cantAfford = false;
 			}
 			else {
@@ -60,10 +60,10 @@ public class AmmoRefill extends InteractableStaticEntity {
 	public void postTick() {
 		
 		if(cantAfford && cooldownTimer < cooldown) {
-			triggerText = "              Not enough points!";
+			triggerText = "Not enough points!";
 		}
 		else if(fullAmmo && cooldownTimer < cooldown) {
-			triggerText = "                Full on ammo!";
+			triggerText = "Full on ammo!";
 		}
 		else if(cooldownTimer >= cooldown) {
 			fullAmmo = false;

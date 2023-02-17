@@ -10,7 +10,7 @@ public class Flamethrower extends Gun{
 	
 
 	public Flamethrower(Handler handler) {
-		super(handler, 250, 3, 0, 500, 0, 0.6f, 50);
+		super(handler, 150, 6, 0, 500, 0, 0.6f, 50);
 		this.name = "Flamethrower";
 		originalName = name;
 		upgradedName = "HotBox";

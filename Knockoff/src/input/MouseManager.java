@@ -59,6 +59,7 @@ public class MouseManager implements MouseListener, MouseMotionListener, MouseWh
 		// TODO Auto-generated method stub
 		mouseX = e.getX();
 		mouseY = e.getY();
+		System.out.println(mouseX);
 		
 	}
 

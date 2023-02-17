@@ -6,8 +6,8 @@ import utils.Timer;
 
 public class Luna extends Perk {
 
-	public Luna(Handler handler) {
-		super(handler);
+	public Luna(Handler handler, int level) {
+		super(handler, level);
 		this.name = "Luna";
 		this.icon = Assets.luna;
 	}
@@ -44,13 +44,13 @@ public class Luna extends Perk {
 	
 	@Override
 	public void buff() {
-		handler.getPlayer().getInv().setLuna(true);
+		handler.getPlayer().getInv().setLuna(level);
 		
 	}
 
 	@Override
 	public void debuff() {
-		handler.getPlayer().getInv().setLuna(false);
+		handler.getPlayer().getInv().setLuna(-1);
 		
 	}
 

@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 
 import entities.creatures.Player;
 import entities.statics.InteractableStaticEntity;
+import entities.statics.Wall;
 import main.Handler;
 
 public class StokerFireball extends Bullet {
@@ -22,8 +23,8 @@ public class StokerFireball extends Bullet {
 		float moveToY = handler.getPlayer().getY() - y;
 
 		float angle = (float) Math.atan2(moveToY, moveToX);
-		xMove = (float) (speed * Math.cos(angle));
-		yMove = (float) (speed * Math.sin(angle));
+		xMove = (float) ( Math.cos(angle));
+		yMove = (float) ( Math.sin(angle));
 	}
 	
 	int color = 0;
@@ -57,6 +58,12 @@ public class StokerFireball extends Bullet {
 		
 		for(InteractableStaticEntity e: handler.getWorld().getEntityManager().getInteractables()){
 			if(e.getCollisionBounds(0, 0).intersects(cb)) {
+				handler.getWorld().getEntityManager().getEntities().remove(this);
+				return true;
+			}
+		}
+		for (Wall e : handler.getWorld().getEntityManager().getWalls()) {
+			if (e.getCollisionBounds(0, 0).intersects(cb)) {
 				handler.getWorld().getEntityManager().getEntities().remove(this);
 				return true;
 			}

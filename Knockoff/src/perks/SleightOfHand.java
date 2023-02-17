@@ -7,21 +7,21 @@ public class SleightOfHand extends Perk {
 	
 	//increased reload speed
 
-	public SleightOfHand(Handler handler) {
-		super(handler);
+	public SleightOfHand(Handler handler, int level) {
+		super(handler, level);
 		this.name = "Sleight Of Hand";
 		this.icon = Assets.fasthand;
 	}
 
 	@Override
 	public void buff() {
-		handler.getPlayer().getInv().setSpeedcola(true);
+		handler.getPlayer().getInv().setSpeedcola(level);
 		
 	}
 
 	@Override
 	public void debuff() {
-		handler.getPlayer().getInv().setSpeedcola(false);
+		handler.getPlayer().getInv().setSpeedcola(-1);
 		
 	}
 }

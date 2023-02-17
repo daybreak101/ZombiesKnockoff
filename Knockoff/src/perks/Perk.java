@@ -11,9 +11,11 @@ public abstract class Perk {
 	String name;
 	BufferedImage icon;
 	int cooldown, maxCooldown;
+	int level;
 	
-	public Perk(Handler handler) {
+	public Perk(Handler handler, int level) {
 		this.handler = handler;
+		this.level = level;
 	}
 	
 	public void tick() {}
@@ -22,6 +24,14 @@ public abstract class Perk {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public int getLevel() {
+		return level;
+	}
+	
+	public void setLevel(int level) {
+		this.level = level;
 	}
 
 	public BufferedImage getIcon() {

@@ -27,6 +27,7 @@ public class Stats {
 
 	
 	public void gainKill() {
+		handler.getProgression().gainXP(100);
 		handler.getGlobalStats().gainKill();
 		kills++;
 	}
@@ -73,6 +74,7 @@ public class Stats {
 
 
 	public void addHeadshot() {
+		handler.getProgression().gainXP(50);
 		this.headshots++;
 		handler.getGlobalStats().addHeadshot();
 	}

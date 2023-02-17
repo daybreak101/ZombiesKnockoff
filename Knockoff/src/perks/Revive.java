@@ -5,21 +5,21 @@ import main.Handler;
 
 public class Revive extends Perk{
 
-	public Revive(Handler handler) {
-		super(handler);
+	public Revive(Handler handler, int level) {
+		super(handler, level);
 		this.name = "Revive";
 		this.icon = Assets.revive;
 	}
 
 	@Override
 	public void buff() {
-		handler.getPlayer().getInv().setRevive(true);
+		handler.getPlayer().getInv().setRevive(level);
 		
 	}
 
 	@Override
 	public void debuff() {
-		handler.getPlayer().getInv().setRevive(false);
+		handler.getPlayer().getInv().setRevive(-1);
 		
 	}
 

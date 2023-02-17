@@ -5,10 +5,11 @@ import java.awt.Rectangle;
 import java.util.Random;
 
 import entities.statics.Barrier;
+import entities.statics.InteractableStaticEntity;
+import entities.statics.Wall;
 import main.Handler;
 
 public abstract class Entity {
-	protected boolean isZombie = false;
 	protected Handler handler;
 	protected float x, y;
 	protected int width, height;
@@ -16,7 +17,6 @@ public abstract class Entity {
 	protected boolean active = true;
 	public static final int DEFAULT_HEALTH = 100;
 	protected Rectangle bounds;
-	//protected boolean isFrozen = false;
 	
 	public Entity(Handler handler, float x, float y, int width, int height) {
 		this.handler = handler;
@@ -26,61 +26,6 @@ public abstract class Entity {
 		this.height = height;
 		health = DEFAULT_HEALTH;
 		bounds = new Rectangle(0, 0, width, height);
-	}
-	
-	public void takeDamage(int amount) {
-		
-		boolean crit = false;
-		if(handler.getRoundLogic().getPowerups().isInstakillActive()) {
-			health = 0;
-		}
-		else {
-			crit = isCritical();
-			if(crit && handler.getPlayer().getInv().isDeadshot()) {
-				health -= (amount * 3);
-				System.out.println("critical");
-			}
-			else if(crit) {
-				health -= (amount * 2);
-				System.out.println("critical");
-			}
-			else{
-				health -= amount;
-			}
-			
-		}
-		
-		if(health <= 0 && active == true) {
-			if(crit) {
-				handler.getPlayer().gainPoints(100);
-				handler.getPlayer().getStats().addHeadshot();
-			}
-			else {
-				handler.getPlayer().gainPoints(70);
-			}
-			
-			active = false;
-			die();
-		}
-		else {
-			handler.getPlayer().gainPoints(10);
-		}
-	}
-	
-	public boolean isCritical() {
-		Random rng = new Random();
-		int criticalChance = rng.nextInt(100);
-		
-		if(handler.getPlayer().getInv().isDeadshot()) {
-			if(criticalChance < 20)
-				return true;
-		}	
-		else {
-			if(criticalChance < 10)
-				return true;
-		}
-		
-		return false;
 	}
 	
 	public boolean checkEntityCollisions(float xOffset, float yOffset) {
@@ -93,8 +38,21 @@ public abstract class Entity {
 			else if(e.getCollisionBounds(0f, 0f).intersects(getCollisionBounds(xOffset, yOffset)))
 				return true;
 		}
+		for(Wall e: handler.getWorld().getEntityManager().getWalls()) {
+			if(e.equals(this))
+				continue;
+			if(e.getCollisionBounds(0,0).intersects(getCollisionBounds(xOffset, yOffset))) {
+				return true;
+			}
+		}
+		for(InteractableStaticEntity e: handler.getWorld().getEntityManager().getInteractables()) {
+			if(e.getCollisionBounds(0f, 0f).intersects(getCollisionBounds(xOffset, yOffset)))
+				return true;
+		}
 		return false;
 	}
+	
+	
 	
 	public Rectangle getCollisionBounds(float xOffset, float yOffset) {
 		return new Rectangle((int) (x + bounds.x + xOffset), (int) (y + bounds.y + yOffset), (int) (bounds.width), (int) (bounds.height)); 
@@ -149,8 +107,20 @@ public abstract class Entity {
 		this.active = active;
 	}
 	
-	public boolean isZombie() {
-		return isZombie;
+	public int getCenterX() {
+		return (int) x + width/2;
+	}
+	
+	public int getCenterY() {
+		return (int) y + height/2;
+	}
+	
+	public float getRenderX() {
+		return x - handler.getGameCamera().getxOffset();
+	}
+	
+	public float getRenderY() {
+		return y - handler.getGameCamera().getyOffset();
 	}
 
 	public void tick() {}

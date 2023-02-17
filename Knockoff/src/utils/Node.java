@@ -11,13 +11,18 @@ public class Node {
 	int x, y;
 	ArrayList<Node> nextNodes;
 	Ellipse2D.Float radius;
+	boolean withinPlayable;
 	
-	public Node(int vertex, int x, int y) {
+	public Node(int vertex, int x, int y, int withinPlayable) {
 		this.x = x;
 		this.y = y;
 		this.vertex = vertex;
 		nextNodes = new ArrayList<Node>();
 		radius = new Ellipse2D.Float(x - 5, y - 5, 10, 10);
+		if(withinPlayable == 1) 
+			this.withinPlayable = true;
+		else
+			this.withinPlayable = false;
 		//radius = new Ellipse2D.Float(x - 50, y - 50, 100, 100);
 	}
 	
@@ -65,6 +70,10 @@ public class Node {
 
 	public void setY(int y) {
 		this.y = y;
+	}
+	
+	public boolean withinPlayable() {
+		return withinPlayable;
 	}
 	
 	

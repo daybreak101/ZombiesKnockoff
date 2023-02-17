@@ -29,35 +29,7 @@ public class Licker extends Zombie {
 		if (!justAttacked)
 			zombieAnim.tick();
 	}
-	
-	public void followPlayer() {
-		xMove = 0;
-		yMove = 0;
 
-		if (justAttacked == true) {
-			timer++;
-			if (timer == 100) {
-				justAttacked = false;
-				timer = 0;
-			}
-		} else {
-			float moveToX = handler.getPlayer().getX() - x;
-			float moveToY = handler.getPlayer().getY() - y;
-
-			float angle = (float) Math.atan2(moveToY, moveToX);
-			xMove = (float) (speed * Math.cos(angle));
-			yMove = (float) (speed * Math.sin(angle));
-
-			if (!checkEntityCollisions(xMove, 0f)) {
-				moveX();
-			}
-
-			if (!checkEntityCollisions(0f, yMove)) {
-
-				moveY();
-			}
-		}
-	}
 
 	@Override
 	public void render(Graphics g) {
@@ -75,7 +47,7 @@ public class Licker extends Zombie {
 		g2d.drawImage(Assets.shadow, (int) (x + 10 - handler.getGameCamera().getxOffset()),
 				(int) (y + 10 - handler.getGameCamera().getyOffset()), 70, 70, null);
 
-		if (isBurning) {
+		if (burnStatus.isBurning()) {
 			g2d.setColor(Color.orange);
 			g2d.fillOval((int) (x + 10 - handler.getGameCamera().getxOffset()),
 					(int) (y + 10 - handler.getGameCamera().getyOffset()), 70, 70);

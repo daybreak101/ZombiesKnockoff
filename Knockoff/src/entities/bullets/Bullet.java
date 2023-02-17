@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import entities.Entity;
 import entities.creatures.Zombie;
 import entities.statics.InteractableStaticEntity;
+import entities.statics.Wall;
 import main.Handler;
 import weapons.Gun;
 
@@ -22,7 +23,7 @@ public class Bullet extends Entity {
 	protected boolean fromTrap;
 	ArrayList<Zombie> zombiesHit;
 
-	//normal bullet
+	// normal bullet
 	public Bullet(Handler handler, float x, float y, int range) {
 		super(handler, x, y, 5, 5);
 		bounds = new Rectangle(0, 0, 0, 0);
@@ -34,13 +35,13 @@ public class Bullet extends Entity {
 		this.speed = 30;
 		this.mouseX = x - handler.getGameCamera().getxOffset() - (int) handler.getMouseManager().getMouseX();
 		this.mouseY = y - handler.getGameCamera().getyOffset() - (int) handler.getMouseManager().getMouseY();
-		angle = (float) Math.atan2(-mouseY, -mouseX);
-		xMove = (float) (speed * Math.cos(angle));
-		yMove = (float) (speed * Math.sin(angle));
+		angle = (float) Math.atan2(-(mouseY), -(mouseX));
+		xMove = (float) Math.cos(angle);
+		yMove = (float) Math.sin(angle);
 		zombiesHit = new ArrayList<Zombie>();
 	}
-	
-	//turret bullet
+
+	// turret bullet
 	public Bullet(Handler handler, Gun gun, float x, float y, float targetX, float targetY, int range) {
 		super(handler, x, y, 5, 5);
 		bounds = new Rectangle(0, 0, 0, 0);
@@ -53,12 +54,12 @@ public class Bullet extends Entity {
 		this.mouseX = x - (int) targetX;
 		this.mouseY = y - (int) targetY;
 		angle = (float) Math.atan2(-mouseY, -mouseX);
-		xMove = (float) (speed * Math.cos(angle));
-		yMove = (float) (speed * Math.sin(angle));
+		xMove = (float) Math.cos(angle);
+		yMove = (float) Math.sin(angle);
 		zombiesHit = new ArrayList<Zombie>();
 	}
-	
-	//idk
+
+	// idk
 	public Bullet(Handler handler, float x, float y, int range, float radianOffset) {
 		super(handler, x, y, 5, 5);
 		bounds = new Rectangle(0, 0, 0, 0);
@@ -67,12 +68,14 @@ public class Bullet extends Entity {
 		this.range = range;
 		this.rangeCounter = 0;
 		this.gunFiredFrom = handler.getPlayer().getInv().getGun();
-		this.speed = 30;
+		this.speed = 10;
 		this.mouseX = x - handler.getGameCamera().getxOffset() - (int) handler.getMouseManager().getMouseX();
 		this.mouseY = y - handler.getGameCamera().getyOffset() - (int) handler.getMouseManager().getMouseY();
 		angle = (float) Math.atan2(-mouseY, -mouseX);
-		xMove = (float) (speed * Math.cos(angle + radianOffset));
-		yMove = (float) (speed * Math.sin(angle + radianOffset));
+		// xMove = (float) (speed * Math.cos(angle + radianOffset));
+		// yMove = (float) (speed * Math.sin(angle + radianOffset));
+		xMove = (float) Math.cos(angle + radianOffset);
+		yMove = (float) Math.sin(angle + radianOffset);
 		zombiesHit = new ArrayList<Zombie>();
 	}
 
@@ -84,18 +87,27 @@ public class Bullet extends Entity {
 		this.angle = angle;
 	}
 
+	int travelTicker = 0;
+
 	@Override
 	public void tick() {
 		// if bullet hits a rock, it should end there, since it cannot penetrate it
-		moveX();
-		moveY();
-		checkForImpact();
+		while (travelTicker < speed) {
+			moveX();
+			moveY();
+			travelTicker++;
+			if(checkForImpact() && (zombiesHit.size() >= 6 && handler.getPlayer().getInv().getDoubletap() >= 1
+					|| zombiesHit.size() >= 4))
+				break;			
+		}
+		travelTicker = 0;
+
 		die();
 		postTick();
 	}
-	
+
 	public void postTick() {
-		
+
 	}
 
 	public void moveX() {
@@ -120,33 +132,43 @@ public class Bullet extends Entity {
 		cb = new Rectangle((int) (x + bounds.x - 1), (int) (y + bounds.y - 1), bounds.width + 1, bounds.height + 1);
 
 		float damageMultiplier = 1;
-		if(handler.getPlayer().getInv().isDoubletap()) {
+		if (handler.getPlayer().getInv().getDoubletap() == 3) {
 			damageMultiplier += 1;
 		}
-		if(handler.getPlayer().getInv().isStronghold()) {
+		if (handler.getPlayer().getInv().getStronghold() > -1) {
 			damageMultiplier += handler.getPlayer().getStrongholdDamageMultiplier();
 		}
-		
+
 		for (Zombie e : handler.getWorld().getEntityManager().getZombies()) {
 			if (e.getHitBox(0, 0).intersects(cb) && !zombiesHit.contains(e)) {
-				if(fromTrap)
+				if (fromTrap)
 					e.damageByTrap(gunFiredFrom.getDamage());
 				else {
-					e.takeDamage((int) (gunFiredFrom.getDamage()/(zombiesHit.size()+1) * damageMultiplier));
+					e.takeDamage((int) (gunFiredFrom.getDamage() / (zombiesHit.size() + 1) * damageMultiplier));
 					zombiesHit.add(e);
 				}
-				
-				if(zombiesHit.size() >= 4) {
+				if (handler.getPlayer().getInv().getDoubletap() >= 1) {
+					if (zombiesHit.size() >= 6) {
+						handler.getWorld().getEntityManager().getEntities().remove(this);
+						return true;
+					}
+				} else if (zombiesHit.size() >= 4) {
 					handler.getWorld().getEntityManager().getEntities().remove(this);
 					return true;
 				}
-				
+
 			}
 		}
 		for (InteractableStaticEntity e : handler.getWorld().getEntityManager().getInteractables()) {
-			
-			
-			if (!handler.getWorld().getEntityManager().getBarriers().contains(e) && e.getCollisionBounds(0, 0).intersects(cb)) {
+
+			if (!handler.getWorld().getEntityManager().getBarriers().contains(e)
+					&& e.getCollisionBounds(0, 0).intersects(cb)) {
+				handler.getWorld().getEntityManager().getEntities().remove(this);
+				return true;
+			}
+		}
+		for (Wall e : handler.getWorld().getEntityManager().getWalls()) {
+			if (e.getCollisionBounds(0, 0).intersects(cb)) {
 				handler.getWorld().getEntityManager().getEntities().remove(this);
 				return true;
 			}
@@ -158,10 +180,8 @@ public class Bullet extends Entity {
 	@Override
 	public void die() {
 		rangeCounter++;
-		if (handler.getPlayer().getInv().isDeadshot()) {
-			if (rangeCounter >= range * 1.5) {
+		if (rangeCounter >= range * 1.5 && handler.getPlayer().getInv().getDeadshot() > -1) {
 				handler.getWorld().getEntityManager().getEntities().remove(this);
-			}
 		} else if (rangeCounter >= range) {
 			handler.getWorld().getEntityManager().getEntities().remove(this);
 		}
